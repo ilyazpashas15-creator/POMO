@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+{% block title %}FocusForge — Room {{ room_id }}{% endblock %}
+{% block meta_desc %}Join FocusForge Study Room {{ room_id }} for real-time collaborative studying.{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Username prompt overlay -->
+<div class="overlay" id="nameOverlay" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+    <div class="modal">
+        <div class="modal-emoji">👋</div>
+        <div class="modal-title" id="nameTitle">Join Room <span style="color:var(--accent)">{{ room_id }}</span></div>
+        <div class="modal-body">Choose your display name to join the study session.</div>
+        <input type="text" id="usernameInput" placeholder="Your name..." maxlength="30"
+            style="margin-bottom:1rem; text-align:center;" aria-label="Display name"
+            onkeydown="if(event.key==='Enter')joinRoom()">
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="joinRoom()" id="btnJoinName">⚡ Enter Room</button>
+        </div>
+    </div>
+</div>
+
+<div
+    style="display:flex; flex-direction:column; gap:0; height:calc(100vh - 60px); padding:0; max-width:100%; overflow:hidden;">
+
+    <!-- Room Header Bar -->
+    <div
+        style="display:flex; align-items:center; gap:1rem; padding:.75rem 1.5rem; background:var(--bg-2); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div>
+            <span
+                style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);">Room</span>
+            <span
+                style="font-family:var(--font-mono);font-weight:700;font-size:1rem;color:var(--accent);margin-left:.4rem;">{{
+                room_id }}</span>
+        </div>
+        <button class="btn btn-ghost" style="padding:.3rem .7rem;font-size:.78rem;" onclick="copyRoomLink()"
+            id="btnCopyLink" aria-label="Copy room link">🔗 Copy Link</button>
+        <div style="flex:1;"></div>
+        <div id="onlineCount" style="font-size:.8rem;color:var(--text-3);">
+            <span id="onlineDot"
+                style="display:inline-block;width:8px;height:8px;background:var(--success);border-radius:50%;margin-right:.3rem;"></span>
+            <span id="onlineNum">0</span> online
+        </div>
+        <a href="/room" class="btn btn-ghost" style="padding:.3rem .7rem;font-size:.78rem;" aria-label="Leave room">←
+            Leave</a>
+    </div>
+
+    <!-- Main Room Content -->
+    <div style="display:grid; grid-template-columns:1fr 360px; flex:1; overflow:hidden; padding:1rem; gap:1rem;">
+
+        <!-- LEFT: Timer + Peer Timers -->
+        <div style="display:flex; flex-direction:column; gap:1rem; overflow-y:auto;">
+
+            <!-- My Timer Card -->
+            <div class="card" id="roomTimerCard" style="text-align:center;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                    <div class="section-title">⏱ My Timer</div>
+                    <div class="tabs" style="width:auto;">
+                        <button class="tab-btn active" onclick="setRoomMode('pomodoro',this)">25 min</button>
+                        <button class="tab-btn" onclick="setRoomMode('short',this)">5 min</button>
+                        <button class="tab-btn" onclick="setRoomMode('long',this)">15 min</button>
+                        <button class="tab-btn" onclick="setRoomMode('custom',this)">Custom</button>
+                    </div>
+                </div>
+
+                <!-- Custom setter -->
+                <div id="roomCustomSetter" style="display:none;margin-bottom:1rem;">
+                    <div class="timer-set-row">
+                        <input type="number" class="seg-input" id="rSetH" value="0" min="0" max="23" aria-label="Hours">
+                        <span class="sep">:</span>
+                        <input type="number" class="seg-input" id="rSetM" value="25" min="0" max="59"
+                            aria-label="Minutes">
+                        <span class="sep">:</span>
+                        <input type="number" class="seg-input" id="rSetS" value="0" min="0" max="59"
+                            aria-label="Seconds">
+                    </div>
+                    <button class="btn btn-secondary" style="margin-top:.5rem;"
+                        onclick="applyRoomCustom()">Apply</button>
+                </div>
+
+                <!-- Timer Display -->
+                <div class="progress-ring-wrap" style="margin-bottom:1.25rem;">
+                    <svg class="progress-ring" width="220" height="220" aria-label="Timer progress">
+                        <circle class="progress-ring-bg" cx="110" cy="110" r="98" />
+                        <circle class="progress-ring-track" id="roomProgressRing" cx="110" cy="110" r="98"
+                            stroke-dasharray="615.75" stroke-dashoffset="0" />
+                    </svg>
+                    <div class="progress-ring-inner">
+                        <div class="timer-display" id="roomTimerDisplay" style="font-size:3.5rem;">
+                            <span id="rTimerM">25</span>:<span id="rTimerS">00</span>
+                        </div>
+                        <div id="roomModeLabel"
+                            style="font-size:.75rem;color:var(--text-3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:.25rem;">
+                            Pomodoro</div>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary btn-timer" id="rBtnStart" onclick="startRoomTimer()"
+                        aria-label="Start timer">▶ Start</button>
+                    <button class="btn btn-warning btn-timer" id="rBtnPause" onclick="pauseRoomTimer()"
+                        style="display:none;" aria-label="Pause timer">⏸ Pause</button>
+                    <button class="btn btn-secondary btn-timer" onclick="resetRoomTimer()" aria-label="Reset timer">↺
+                        Reset</button>
+                </div>
+            </div>
+
+            <!-- Peer Timers -->
+            <div class="card">
+                <div class="section-title" style="margin-bottom:.75rem;">👥 Peer Timers</div>
+                <div id="peerTimers" class="peer-timer-wrap">
+                    <div style="font-size:.8rem;color:var(--text-3);">Other participants' timers will appear here.</div>
+                </div>
+            </div>
+
+            <!-- Online Users -->
+            <div class="card">
+                <div class="section-title" style="margin-bottom:.75rem;">🟢 In This Room</div>
+                <div id="roomUsersList" class="room-users" style="padding:0;border:none;"></div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: Chat -->
+        <div style="display:flex; flex-direction:column; gap:1rem; overflow:hidden;">
+            <div class="chat-box" style="height:100%;">
+                <div class="room-users" id="chatRoomUsers"
+                    style="flex-shrink:0; padding:.5rem .75rem; background:var(--bg-3); flex-wrap:wrap; gap:.3rem;">
+                </div>
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="typing-indicator" id="typingIndicator"></div>
+                <div class="chat-input-row">
+                    <label class="file-attach-btn" for="fileInput" title="Attach file" aria-label="Attach file">📎
+                        <input type="file" id="fileInput" style="display:none;" onchange="uploadFile(this)">
+                    </label>
+                    <input type="text" id="chatInput" placeholder="Send a message..." aria-label="Chat message"
+                        maxlength="500" onkeydown="handleChatKey(event)" oninput="emitTyping()">
+                    <button class="btn btn-primary" style="padding:.55rem .9rem;" onclick="sendMessage()"
+                        aria-label="Send message">↑</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ROOM_ID = "{{ room_id }}";
+    const ROOM_CIRCUMFERENCE = 2 * Math.PI * 98; // 615.75
+
+    // ── STATE ──────────────────────────────────────────────────────
+    let socket = null;
+    let myUsername = sessionStorage.getItem('ff_username') || '';
+    let roomTotalSecs = 25 * 60;
+    let roomRemainSecs = 25 * 60;
+    let roomRunning = false;
+    let roomInterval = null;
+    let peerTimers = {};
+    let typingTimeout = null;
+
+    // ── INIT ───────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!myUsername) {
+            document.getElementById('nameOverlay').classList.add('active');
+            document.getElementById('usernameInput').focus();
+        } else {
+            initSocket();
+        }
+        updateRoomDisplay(roomRemainSecs);
+        updateRoomRing(1);
+    });
+
+    function joinRoom() {
+        const input = document.getElementById('usernameInput');
+        const name = input.value.trim();
+        if (!name) { input.style.borderColor = 'var(--danger)'; return; }
+        myUsername = name;
+        sessionStorage.setItem('ff_username', name);
+        document.getElementById('nameOverlay').classList.remove('active');
+        initSocket();
+    }
+
+    function initSocket() {
+        socket = io();
+
+        socket.on('connect', () => {
+            socket.emit('join_room', { room: ROOM_ID, username: myUsername });
+        });
+
+        socket.on('user_joined', (data) => {
+            appendSystemMsg(`👋 ${data.username} joined the room`);
+            document.getElementById('onlineNum').textContent = data.count;
+        });
+
+        socket.on('user_left', (data) => {
+            appendSystemMsg(`👋 ${data.username} left`);
+            document.getElementById('onlineNum').textContent = data.count;
+            // Remove peer timer
+            delete peerTimers[data.username];
+            renderPeerTimers();
+        });
+
+        socket.on('room_users', (data) => {
+            document.getElementById('onlineNum').textContent = data.count;
+            renderRoomUsers(data.users);
+        });
+
+        socket.on('chat_history', (msgs) => {
+            const box = document.getElementById('chatMessages');
+            box.innerHTML = '';
+            msgs.forEach(m => appendMsg(m, m.username === myUsername));
+            box.scrollTop = box.scrollHeight;
+        });
+
+        socket.on('new_message', (data) => {
+            appendMsg(data, data.username === myUsername);
+        });
+
+        socket.on('peer_timer', (data) => {
+            peerTimers[data.username] = data;
+            renderPeerTimers();
+        });
+
+        socket.on('user_typing', (data) => {
+            const el = document.getElementById('typingIndicator');
+            el.textContent = data.username + ' is typing...';
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { el.textContent = ''; }, 2000);
+        });
+    }
+
+    // ── ROOM TIMER ─────────────────────────────────────────────────
+    const ROOM_MODES = {
+        pomodoro: { m: 25, s: 0, label: 'Pomodoro' },
+        short: { m: 5, s: 0, label: 'Short Break' },
+        long: { m: 15, s: 0, label: 'Long Break' },
+        custom: { m: 0, s: 0, label: 'Custom' }
+    };
+    let roomCurrentMode = 'pomodoro';
+
+    function setRoomMode(mode, btn) {
+        if (roomRunning) return;
+        roomCurrentMode = mode;
+        document.querySelectorAll('#roomTimerCard .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('roomCustomSetter').style.display = mode === 'custom' ? 'block' : 'none';
+        document.getElementById('roomModeLabel').textContent = ROOM_MODES[mode].label;
+        if (mode !== 'custom') {
+            const m = ROOM_MODES[mode];
+            roomTotalSecs = m.m * 60 + m.s;
+            roomRemainSecs = roomTotalSecs;
+            updateRoomDisplay(roomRemainSecs);
+            updateRoomRing(1);
+        }
+    }
+
+    function applyRoomCustom() {
+        const h = parseInt(document.getElementById('rSetH').value) || 0;
+        const m = parseInt(document.getElementById('rSetM').value) || 0;
+        const s = parseInt(document.getElementById('rSetS').value) || 0;
+        roomTotalSecs = h * 3600 + m * 60 + s;
+        roomRemainSecs = roomTotalSecs;
+        updateRoomDisplay(roomRemainSecs);
+        updateRoomRing(1);
+    }
+
+    function startRoomTimer() {
+        if (roomRemainSecs <= 0) { resetRoomTimer(); return; }
+        roomRunning = true;
+        document.getElementById('rBtnStart').style.display = 'none';
+        document.getElementById('rBtnPause').style.display = '';
+        document.getElementById('roomTimerCard').classList.add('timer-running');
+
+        roomInterval = setInterval(() => {
+            roomRemainSecs--;
+            updateRoomDisplay(roomRemainSecs);
+            updateRoomRing(roomRemainSecs / roomTotalSecs);
+            // Broadcast to peers
+            if (socket) {
+                socket.emit('timer_update', {
+                    room: ROOM_ID,
+                    username: myUsername,
+                    remain: roomRemainSecs,
+                    total: roomTotalSecs,
+                    running: true
+                });
+            }
+            if (roomRemainSecs <= 0) {
+                clearInterval(roomInterval);
+                roomRunning = false;
+                document.getElementById('rBtnStart').style.display = '';
+                document.getElementById('rBtnPause').style.display = 'none';
+                document.getElementById('roomTimerCard').className = 'card ring-anim';
+                showToast('🎉 Timer complete! Great work!', 'success');
+            }
+        }, 1000);
+    }
+
+    function pauseRoomTimer() {
+        roomRunning = false;
+        clearInterval(roomInterval);
+        document.getElementById('rBtnStart').style.display = '';
+        document.getElementById('rBtnPause').style.display = 'none';
+        document.getElementById('roomTimerCard').className = 'card timer-paused';
+        if (socket) socket.emit('timer_update', { room: ROOM_ID, username: myUsername, remain: roomRemainSecs, total: roomTotalSecs, running: false });
+    }
+
+    function resetRoomTimer() {
+        roomRunning = false;
+        clearInterval(roomInterval);
+        setRoomMode(roomCurrentMode, document.querySelector('#roomTimerCard .tab-btn.active'));
+        document.getElementById('rBtnStart').style.display = '';
+        document.getElementById('rBtnPause').style.display = 'none';
+        document.getElementById('roomTimerCard').className = 'card';
+    }
+
+    function updateRoomDisplay(secs) {
+        secs = Math.max(0, secs);
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = secs % 60;
+        document.getElementById('rTimerM').textContent = h > 0 ? String(h) + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0');
+        document.getElementById('rTimerS').textContent = String(s).padStart(2, '0');
+    }
+
+    function updateRoomRing(ratio) {
+        const offset = ROOM_CIRCUMFERENCE * (1 - ratio);
+        document.getElementById('roomProgressRing').style.strokeDashoffset = offset;
+    }
+
+    // ── PEER TIMERS ─────────────────────────────────────────────────
+    function renderPeerTimers() {
+        const wrap = document.getElementById('peerTimers');
+        const peers = Object.entries(peerTimers);
+        if (!peers.length) {
+            wrap.innerHTML = '<div style="font-size:.8rem;color:var(--text-3);">Other participants\' timers will appear here.</div>';
+            return;
+        }
+        wrap.innerHTML = peers.map(([name, data]) => {
+            const m = Math.floor(data.remain / 60);
+            const s = data.remain % 60;
+            const timeStr = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            return `
+            <div class="peer-timer-card">
+                <div class="peer-timer-name">${escHtml(name)}</div>
+                <div class="peer-timer-time ${data.running ? 'pulse-anim' : ''}">${timeStr}</div>
+                <div style="font-size:.7rem;color:var(--text-3);margin-top:.2rem;">${data.running ? '▶ Running' : '⏸ Paused'}</div>
+            </div>
+        `;
+        }).join('');
+    }
+
+    // ── ROOM USERS ─────────────────────────────────────────────────
+    function renderRoomUsers(users) {
+        const html = users.map(u => `
+        <div class="user-chip">
+            <div class="user-dot"></div>
+            ${escHtml(u)}
+        </div>
+    `).join('');
+        document.getElementById('roomUsersList').innerHTML = html || '<span style="font-size:.8rem;color:var(--text-3);">No one here yet</span>';
+        document.getElementById('chatRoomUsers').innerHTML = html;
+    }
+
+    // ── CHAT ───────────────────────────────────────────────────────
+    function handleChatKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
+        if (!msg || !socket) return;
+        socket.emit('send_message', {
+            room: ROOM_ID,
+            username: myUsername,
+            message: msg
+        });
+        input.value = '';
+    }
+
+    function emitTyping() {
+        if (socket) socket.emit('typing', { room: ROOM_ID, username: myUsername });
+    }
+
+    function appendMsg(data, isOwn) {
+        const box = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = 'chat-msg' + (isOwn ? ' own' : '');
+        const ts = new Date(data.ts);
+        const timeStr = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let body = '';
+        if (data.message) body += `<div class="chat-msg-body">${escHtml(data.message)}</div>`;
+        if (data.file_url) {
+            const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(data.file_url);
+            if (isImg) {
+                body += `<div class="chat-msg-body" style="padding:.3rem;"><img src="${data.file_url}" style="max-width:200px;border-radius:8px;" alt="Shared image"></div>`;
+            } else {
+                body += `<div class="chat-msg-body"><a href="${data.file_url}" target="_blank" class="chat-file-link">📎 ${escHtml(data.file_name || 'File')}</a></div>`;
+            }
+        }
+        div.innerHTML = `
+        <div class="chat-msg-header">
+            <span class="chat-msg-name">${escHtml(data.username)}</span>
+            <span class="chat-msg-time">${timeStr}</span>
+        </div>
+        ${body}
+    `;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function appendSystemMsg(text) {
+        const box = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.style.cssText = 'text-align:center;font-size:.75rem;color:var(--text-3);padding:.25rem 0;';
+        div.textContent = text;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    async function uploadFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        showToast('📤 Uploading...', 'info');
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+            const res = await fetch('/api/upload', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.url && socket) {
+                socket.emit('send_message', {
+                    room: ROOM_ID,
+                    username: myUsername,
+                    message: '',
+                    file_url: data.url,
+                    file_name: data.name
+                });
+            }
+        } catch (e) {
+            showToast('❌ Upload failed', 'error');
+        }
+        input.value = '';
+    }
+
+    function copyRoomLink() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => showToast('🔗 Room link copied!', 'success'));
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function showToast(msg, type = 'info') {
+        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-text">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+</script>
+{% endblock %}

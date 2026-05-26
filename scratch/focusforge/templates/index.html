@@ -1,0 +1,719 @@
+{% extends "base.html" %}
+{% block title %}FocusForge — Solo Timer{% endblock %}
+{% block meta_desc %}FocusForge Solo Timer — Pomodoro, custom timer, to-do list, session history, and analytics.{%
+endblock %}
+
+{% block content %}
+<div style="display:grid; grid-template-columns: 1fr 340px; gap:1.5rem; padding-top:1rem;" id="mainGrid">
+
+    <!-- ══ LEFT COLUMN ══════════════════════════════════════════════════ -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+        <!-- Timer Card -->
+        <div class="card" id="timerCard" style="text-align:center; padding: 2.5rem 2rem;">
+            <div class="hero-badge">⚡ Focus Mode</div>
+
+            <!-- Motivation Quote -->
+            <div id="quoteBlock" class="quote-block" style="margin-bottom:1.5rem; text-align:left;">
+                <div id="quoteText">Loading inspiration...</div>
+                <div class="quote-author" id="quoteAuthor"></div>
+            </div>
+
+            <!-- Timer Mode Tabs -->
+            <div class="tabs" style="margin-bottom:1.75rem;" role="tablist">
+                <button class="tab-btn active" id="tabPomodoro" onclick="setMode('pomodoro')" role="tab"
+                    aria-selected="true">Pomodoro</button>
+                <button class="tab-btn" id="tabShort" onclick="setMode('short')" role="tab" aria-selected="false">Short
+                    Break</button>
+                <button class="tab-btn" id="tabLong" onclick="setMode('long')" role="tab" aria-selected="false">Long
+                    Break</button>
+                <button class="tab-btn" id="tabCustom" onclick="setMode('custom')" role="tab"
+                    aria-selected="false">Custom</button>
+            </div>
+
+            <!-- Custom Timer Setter (hidden by default) -->
+            <div id="customSetter" style="display:none; margin-bottom:1.5rem;">
+                <div class="timer-set-row">
+                    <input type="number" class="seg-input" id="setH" value="0" min="0" max="23" placeholder="HH"
+                        aria-label="Hours">
+                    <span class="sep">:</span>
+                    <input type="number" class="seg-input" id="setM" value="25" min="0" max="59" placeholder="MM"
+                        aria-label="Minutes">
+                    <span class="sep">:</span>
+                    <input type="number" class="seg-input" id="setS" value="0" min="0" max="59" placeholder="SS"
+                        aria-label="Seconds">
+                </div>
+                <button class="btn btn-secondary" style="margin-top:0.75rem;" onclick="applyCustomTime()">Apply</button>
+            </div>
+
+            <!-- Progress Ring + Timer Display -->
+            <div class="progress-ring-wrap" style="margin-bottom:1.75rem;">
+                <svg class="progress-ring" width="260" height="260" aria-label="Timer progress">
+                    <circle class="progress-ring-bg" cx="130" cy="130" r="118" />
+                    <circle class="progress-ring-track" id="progressRing" cx="130" cy="130" r="118"
+                        stroke-dasharray="741.1" stroke-dashoffset="0" />
+                </svg>
+                <div class="progress-ring-inner">
+                    <div class="timer-display" id="timerDisplay" aria-live="polite">
+                        <span id="timerH" style="display:none">00:</span><span id="timerM">25</span>:<span
+                            id="timerS">00</span><span class="timer-ms" id="timerMs">.000</span>
+                    </div>
+                    <div id="modeLabel"
+                        style="font-size:0.8rem;color:var(--text-3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:.4rem;">
+                        Pomodoro</div>
+                </div>
+            </div>
+
+            <!-- Session Label -->
+            <div style="display:flex; gap:.75rem; margin-bottom:1.25rem; justify-content:center;">
+                <input type="text" id="sessionLabel" placeholder="Session label (e.g. Math study)"
+                    style="max-width:280px;" maxlength="60" aria-label="Session label">
+                <div id="labelTagDisplay"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="timer-controls" id="timerControls">
+                <button class="btn btn-primary btn-timer" id="btnStart" onclick="startTimer()"
+                    aria-label="Start timer">▶ Start</button>
+                <button class="btn btn-warning btn-timer" id="btnPause" onclick="pauseTimer()" style="display:none;"
+                    aria-label="Pause timer">⏸ Pause</button>
+                <button class="btn btn-secondary btn-timer" id="btnReset" onclick="resetTimer()"
+                    aria-label="Reset timer">↺ Reset</button>
+                <button class="btn btn-ghost btn-timer" id="btnSkip" onclick="skipSession()" aria-label="Skip session">⏭
+                    Skip</button>
+            </div>
+
+            <!-- Session counter -->
+            <div style="margin-top:1.25rem; font-size:.8rem; color:var(--text-3);">
+                Session <span id="sessCount" style="color:var(--accent);font-weight:700;">1</span> / 4 —
+                <span id="totalFocused" style="color:var(--accent-2);font-weight:600;">0 min</span> focused today
+            </div>
+        </div>
+
+        <!-- ── STATS ROW ──────────────────────────────────────────────── -->
+        <div id="reportSection">
+            <div class="section-header">
+                <span class="section-title">📊 Analytics</span>
+                <div class="tabs" style="width:auto;">
+                    <button class="tab-btn active" id="repWeek" onclick="loadReport('weekly',this)">Week</button>
+                    <button class="tab-btn" id="repMonth" onclick="loadReport('monthly',this)">Month</button>
+                    <button class="tab-btn" id="repYear" onclick="loadReport('yearly',this)">Year</button>
+                </div>
+            </div>
+
+            <div class="grid-3" id="statsGrid">
+                <div class="stat-block">
+                    <div class="stat-number" id="statSessions">—</div>
+                    <div class="stat-label">Sessions</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-number" id="statHours">—</div>
+                    <div class="stat-label">Hours</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-number" id="statMins">—</div>
+                    <div class="stat-label">Total Min</div>
+                </div>
+            </div>
+
+            <!-- Label breakdown chart -->
+            <div class="card" style="margin-top:1rem;">
+                <div class="card-title">Focus by Label</div>
+                <div id="labelChart" class="bar-chart">
+                    <div class="empty-state" style="width:100%">
+                        <div class="empty-state-icon">📈</div>Complete sessions to see chart
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SESSION HISTORY ────────────────────────────────────────── -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-title">🕐 Session History</span>
+                <button class="btn btn-ghost" style="font-size:.75rem;padding:.35rem .7rem;"
+                    onclick="clearAllSessions()" aria-label="Clear all sessions">Clear All</button>
+            </div>
+            <div id="sessionList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⏳</div>No sessions yet. Start a timer!
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══ RIGHT SIDEBAR ════════════════════════════════════════════════ -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+        <!-- To-Do List Card -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-title">✅ To-Do List</span>
+                <span id="todoCount" class="tag tag-accent">0</span>
+            </div>
+            <div style="display:flex; gap:.5rem; margin-bottom:1rem;">
+                <input type="text" id="todoInput" placeholder="Add a task..." aria-label="New task" maxlength="120"
+                    onkeydown="if(event.key==='Enter')addTodo()">
+                <button class="btn btn-primary" style="white-space:nowrap; padding:.55rem .9rem;" onclick="addTodo()"
+                    aria-label="Add task">+ Add</button>
+            </div>
+            <div id="todoList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>No tasks yet
+                </div>
+            </div>
+            <div style="margin-top:.75rem; display:flex; gap:.5rem;">
+                <button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .7rem;flex:1;"
+                    onclick="filterTodos('all')" id="filterAll">All</button>
+                <button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .7rem;flex:1;"
+                    onclick="filterTodos('active')" id="filterActive">Active</button>
+                <button class="btn btn-ghost" style="font-size:.75rem;padding:.3rem .7rem;flex:1;"
+                    onclick="filterTodos('done')" id="filterDone">Done</button>
+            </div>
+        </div>
+
+        <!-- Reminders Card -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-title">🔔 Next-Day Reminders</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:.5rem; margin-bottom:.75rem;">
+                <input type="text" id="reminderText" placeholder="Reminder message..." aria-label="Reminder message"
+                    maxlength="100">
+                <div style="display:flex;gap:.5rem;">
+                    <input type="time" id="reminderTime" style="flex:1;" aria-label="Reminder time">
+                    <button class="btn btn-primary" style="white-space:nowrap;" onclick="addReminder()"
+                        aria-label="Add reminder">+ Add</button>
+                </div>
+            </div>
+            <div id="reminderList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔕</div>No reminders set
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Room Shortcut -->
+        <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;margin-bottom:.75rem;">🧑‍💻</div>
+            <div style="font-weight:700;font-size:1rem;margin-bottom:.3rem;">Study with Others</div>
+            <div style="font-size:.825rem;color:var(--text-2);margin-bottom:1rem;">Join a real-time study room with live
+                chat, shared timers, and file sharing.</div>
+            <a href="/room" class="btn btn-primary" style="width:100%;" aria-label="Go to study rooms">Enter Study Rooms
+                →</a>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ══ SESSION END POPUP ════════════════════════════════════════════════ -->
+<div class="overlay" id="celebOverlay" role="dialog" aria-modal="true" aria-labelledby="celebTitle">
+    <div class="modal">
+        <div class="modal-emoji" id="celebEmoji">🎉</div>
+        <div class="modal-title" id="celebTitle">Session Complete!</div>
+        <div class="modal-body" id="celebBody">Amazing work! You stayed focused for the full session.</div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="closeModal();startTimer()">Start Next →</button>
+            <button class="btn btn-secondary" onclick="closeModal()">Take a Break</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ TOAST CONTAINER ════════════════════════════════════════════════== -->
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ═══════════════════════════════════════════════════════════════
+    // FOCUSFORGE — Solo Timer Script
+    // ═══════════════════════════════════════════════════════════════
+
+    // ── CONSTANTS ──────────────────────────────────────────────────
+    const MODES = {
+        pomodoro: { h: 0, m: 25, s: 0, label: 'Pomodoro' },
+        short: { h: 0, m: 5, s: 0, label: 'Short Break' },
+        long: { h: 0, m: 15, s: 0, label: 'Long Break' },
+        custom: { h: 0, m: 0, s: 0, label: 'Custom' }
+    };
+
+    const QUOTES = [
+        { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+        { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+        { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+        { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+        { text: "Study hard, for the well is deep, and our brains are shallow.", author: "Richard Baxter" },
+        { text: "The beautiful thing about learning is that no one can take it away from you.", author: "B.B. King" },
+        { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+        { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+        { text: "Education is not the filling of a bucket, but the lighting of a fire.", author: "W.B. Yeats" },
+        { text: "Your future self is watching you right now through memories.", author: "Aubrey De Grey" },
+        { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+        { text: "Great things never came from comfort zones.", author: "Unknown" },
+        { text: "Dream it. Wish it. Do it.", author: "Unknown" },
+        { text: "Success doesn't just find you. You have to go out and get it.", author: "Unknown" },
+        { text: "Small daily improvements over time lead to stunning results.", author: "Robin Sharma" }
+    ];
+
+    const CELEBS = [
+        { emoji: "🎉", title: "Session Complete!", body: "Amazing work! You nailed that session!" },
+        { emoji: "🏆", title: "You're On Fire!", body: "Another session crushed. Keep the momentum going!" },
+        { emoji: "💪", title: "Warrior Mode: ON", body: "Your consistency is your superpower!" },
+        { emoji: "⭐", title: "Stellar Focus!", body: "You stayed locked in. That's how legends study!" },
+        { emoji: "🚀", title: "Blast Off!", body: "One more session closer to your goals!" },
+        { emoji: "🌟", title: "Shining Bright!", body: "Consistent effort brings extraordinary results!" }
+    ];
+
+    const CIRCUMFERENCE = 2 * Math.PI * 118; // ~741.1
+
+    // ── STATE ──────────────────────────────────────────────────────
+    let timerInterval = null;
+    let totalSeconds = 0;
+    let remainSeconds = 0;
+    let isRunning = false;
+    let currentMode = 'pomodoro';
+    let sessCount = 1;
+    let totalFocusedMins = 0;
+    let quoteIdx = 0;
+    let todos = [];
+    let reminders = [];
+    let sessions = [];
+    let todoFilter = 'all';
+
+    // ── INIT ───────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        setMode('pomodoro');
+        rotateQuote();
+        setInterval(rotateQuote, 60000);
+        loadTodos();
+        loadReminders();
+        loadSessions();
+        loadReport('weekly', document.getElementById('repWeek'));
+        checkReminders();
+        setInterval(checkReminders, 60000);
+    });
+
+    // ── TIMER MODE ─────────────────────────────────────────────────
+    function setMode(mode) {
+        if (isRunning) return;
+        currentMode = mode;
+        // Update tabs
+        ['pomodoro', 'short', 'long', 'custom'].forEach(m => {
+            document.getElementById('tab' + m.charAt(0).toUpperCase() + m.slice(1)).classList.toggle('active', m === mode);
+            document.getElementById('tab' + m.charAt(0).toUpperCase() + m.slice(1)).setAttribute('aria-selected', m === mode);
+        });
+        document.getElementById('customSetter').style.display = mode === 'custom' ? 'block' : 'none';
+        document.getElementById('modeLabel').textContent = MODES[mode].label;
+
+        if (mode !== 'custom') {
+            const m = MODES[mode];
+            totalSeconds = m.h * 3600 + m.m * 60 + m.s;
+            remainSeconds = totalSeconds;
+            updateDisplay(remainSeconds, 0);
+            updateRing(1);
+        }
+        document.getElementById('timerCard').className = 'card';
+    }
+
+    function applyCustomTime() {
+        const h = parseInt(document.getElementById('setH').value) || 0;
+        const m = parseInt(document.getElementById('setM').value) || 0;
+        const s = parseInt(document.getElementById('setS').value) || 0;
+        totalSeconds = h * 3600 + m * 60 + s;
+        remainSeconds = totalSeconds;
+        MODES.custom = { h, m, s };
+        updateDisplay(remainSeconds, 0);
+        updateRing(1);
+        showToast('⏱ Custom timer set!', 'info');
+    }
+
+    // ── TIMER CORE ─────────────────────────────────────────────────
+    let msOffset = 0;
+    let msInterval = null;
+
+    function startTimer() {
+        if (remainSeconds <= 0) { resetTimer(); return; }
+        isRunning = true;
+        document.getElementById('btnStart').style.display = 'none';
+        document.getElementById('btnPause').style.display = '';
+        document.getElementById('timerCard').classList.add('timer-running');
+
+        // Exact second countdown
+        timerInterval = setInterval(() => {
+            remainSeconds--;
+            updateDisplay(remainSeconds, 0);
+            updateRing(remainSeconds / totalSeconds);
+            if (remainSeconds <= 0) {
+                clearInterval(timerInterval);
+                clearInterval(msInterval);
+                sessionComplete();
+            }
+        }, 1000);
+
+        // Milliseconds display (cosmetic)
+        msOffset = 0;
+        msInterval = setInterval(() => {
+            msOffset = (msOffset + 50) % 1000;
+            document.getElementById('timerMs').textContent = '.' + String(msOffset).padStart(3, '0');
+        }, 50);
+    }
+
+    function pauseTimer() {
+        isRunning = false;
+        clearInterval(timerInterval);
+        clearInterval(msInterval);
+        document.getElementById('btnStart').style.display = '';
+        document.getElementById('btnPause').style.display = 'none';
+        document.getElementById('timerCard').className = 'card timer-paused';
+        showToast('⏸ Timer paused', 'info');
+    }
+
+    function resetTimer() {
+        isRunning = false;
+        clearInterval(timerInterval);
+        clearInterval(msInterval);
+        setMode(currentMode);
+        document.getElementById('btnStart').style.display = '';
+        document.getElementById('btnPause').style.display = 'none';
+        document.getElementById('timerCard').className = 'card';
+        document.getElementById('timerMs').textContent = '.000';
+    }
+
+    function skipSession() {
+        if (!isRunning && remainSeconds === totalSeconds) return;
+        pauseTimer();
+        resetTimer();
+        showToast('⏭ Session skipped', 'info');
+    }
+
+    function updateDisplay(secs, ms) {
+        secs = Math.max(0, secs);
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = secs % 60;
+        const hEl = document.getElementById('timerH');
+        document.getElementById('timerM').textContent = h > 0 ? String(m).padStart(2, '0') : String(m).padStart(2, '0');
+        document.getElementById('timerS').textContent = String(s).padStart(2, '0');
+        if (h > 0) {
+            hEl.style.display = '';
+            hEl.textContent = String(h).padStart(2, '0') + ':';
+        } else {
+            hEl.style.display = 'none';
+        }
+    }
+
+    function updateRing(ratio) {
+        const offset = CIRCUMFERENCE * (1 - ratio);
+        document.getElementById('progressRing').style.strokeDashoffset = offset;
+    }
+
+    // ── SESSION COMPLETE ───────────────────────────────────────────
+    function sessionComplete() {
+        isRunning = false;
+        document.getElementById('timerCard').className = 'card ring-anim';
+        document.getElementById('btnStart').style.display = '';
+        document.getElementById('btnPause').style.display = 'none';
+
+        const label = document.getElementById('sessionLabel').value.trim() || 'Untitled';
+        const mins = Math.round(totalSeconds / 60);
+        totalFocusedMins += mins;
+        document.getElementById('totalFocused').textContent = totalFocusedMins + ' min';
+
+        // Save to server
+        fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ label, mode: currentMode, mins })
+        }).then(r => r.json()).then(data => {
+            sessions.unshift({ id: data.id, label, mode: currentMode, mins, ts: new Date().toISOString() });
+            renderSessions();
+            loadReport('weekly', document.getElementById('repWeek'));
+        });
+
+        sessCount++;
+        document.getElementById('sessCount').textContent = sessCount;
+
+        // Celebration popup
+        const celeb = CELEBS[Math.floor(Math.random() * CELEBS.length)];
+        document.getElementById('celebEmoji').textContent = celeb.emoji;
+        document.getElementById('celebTitle').textContent = celeb.title;
+        document.getElementById('celebBody').textContent = celeb.body;
+        document.getElementById('celebOverlay').classList.add('active');
+
+        rotateQuote();
+        resetTimer();
+    }
+
+    function closeModal() {
+        document.getElementById('celebOverlay').classList.remove('active');
+    }
+
+    // Click overlay background to close
+    document.getElementById('celebOverlay').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ── QUOTES ─────────────────────────────────────────────────────
+    function rotateQuote() {
+        quoteIdx = (quoteIdx + 1) % QUOTES.length;
+        const q = QUOTES[quoteIdx];
+        const qEl = document.getElementById('quoteText');
+        const aEl = document.getElementById('quoteAuthor');
+        qEl.style.opacity = 0;
+        setTimeout(() => {
+            qEl.textContent = '"' + q.text + '"';
+            aEl.textContent = '— ' + q.author;
+            qEl.style.opacity = 1;
+            qEl.style.transition = 'opacity 0.6s ease';
+        }, 300);
+    }
+
+    // ── TODOS ──────────────────────────────────────────────────────
+    function loadTodos() {
+        fetch('/api/todos').then(r => r.json()).then(data => {
+            todos = data;
+            renderTodos();
+        });
+    }
+
+    function addTodo() {
+        const input = document.getElementById('todoInput');
+        const text = input.value.trim();
+        if (!text) return;
+        fetch('/api/todos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        }).then(r => r.json()).then(todo => {
+            todos.push(todo);
+            renderTodos();
+            input.value = '';
+            showToast('✅ Task added', 'success');
+        });
+    }
+
+    function toggleTodo(id) {
+        const t = todos.find(x => x.id === id);
+        if (!t) return;
+        fetch(`/api/todos/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ done: !t.done })
+        }).then(r => r.json()).then(updated => {
+            Object.assign(t, updated);
+            renderTodos();
+        });
+    }
+
+    function deleteTodo(id) {
+        fetch(`/api/todos/${id}`, { method: 'DELETE' }).then(() => {
+            todos = todos.filter(x => x.id !== id);
+            renderTodos();
+        });
+    }
+
+    function filterTodos(f) {
+        todoFilter = f;
+        ['all', 'active', 'done'].forEach(ff => {
+            document.getElementById('filter' + ff.charAt(0).toUpperCase() + ff.slice(1))
+                .classList.toggle('active', ff === f);
+        });
+        renderTodos();
+    }
+
+    function renderTodos() {
+        const list = document.getElementById('todoList');
+        let filtered = todos;
+        if (todoFilter === 'active') filtered = todos.filter(t => !t.done);
+        if (todoFilter === 'done') filtered = todos.filter(t => t.done);
+        document.getElementById('todoCount').textContent = todos.filter(t => !t.done).length;
+        if (!filtered.length) {
+            list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div>No tasks here</div>';
+            return;
+        }
+        list.innerHTML = filtered.map(t => `
+        <div class="todo-item" id="todo-${t.id}">
+            <input type="checkbox" class="todo-checkbox" ${t.done ? 'checked' : ''} 
+                onchange="toggleTodo(${t.id})" aria-label="Mark task done">
+            <span class="todo-text ${t.done ? 'done' : ''}">${escHtml(t.text)}</span>
+            <button class="todo-del" onclick="deleteTodo(${t.id})" aria-label="Delete task">✕</button>
+        </div>
+    `).join('');
+    }
+
+    // ── REMINDERS ──────────────────────────────────────────────────
+    function loadReminders() {
+        fetch('/api/reminders').then(r => r.json()).then(data => {
+            reminders = data;
+            renderReminders();
+        });
+    }
+
+    function addReminder() {
+        const text = document.getElementById('reminderText').value.trim();
+        const time = document.getElementById('reminderTime').value;
+        if (!text || !time) { showToast('⚠ Fill in reminder text and time', 'error'); return; }
+        fetch('/api/reminders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, time })
+        }).then(r => r.json()).then(data => {
+            reminders.push({ id: data.id, text, time });
+            renderReminders();
+            document.getElementById('reminderText').value = '';
+            document.getElementById('reminderTime').value = '';
+            showToast('🔔 Reminder set for ' + time, 'success');
+        });
+    }
+
+    function deleteReminder(id) {
+        fetch(`/api/reminders/${id}`, { method: 'DELETE' }).then(() => {
+            reminders = reminders.filter(r => r.id !== id);
+            renderReminders();
+        });
+    }
+
+    function renderReminders() {
+        const list = document.getElementById('reminderList');
+        if (!reminders.length) {
+            list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔕</div>No reminders set</div>';
+            return;
+        }
+        list.innerHTML = reminders.map(r => `
+        <div class="reminder-item">
+            <span class="reminder-time">${r.time}</span>
+            <span class="reminder-text">${escHtml(r.text)}</span>
+            <button class="reminder-del" onclick="deleteReminder(${r.id})" aria-label="Delete reminder">✕</button>
+        </div>
+    `).join('');
+    }
+
+    function checkReminders() {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const nowStr = hh + ':' + mm;
+        reminders.forEach(r => {
+            if (r.time === nowStr) {
+                showToast('🔔 ' + r.text, 'info');
+                if (Notification && Notification.permission === 'granted') {
+                    new Notification('FocusForge Reminder', { body: r.text });
+                }
+            }
+        });
+    }
+
+    // Request notification permission
+    if (Notification && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+
+    // ── SESSIONS ───────────────────────────────────────────────────
+    function loadSessions() {
+        fetch('/api/sessions').then(r => r.json()).then(data => {
+            sessions = data;
+            renderSessions();
+        });
+    }
+
+    function renderSessions() {
+        const list = document.getElementById('sessionList');
+        if (!sessions.length) {
+            list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div>No sessions yet. Start a timer!</div>';
+            return;
+        }
+        list.innerHTML = sessions.slice(0, 20).map(s => {
+            const date = new Date(s.ts);
+            const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const tagClass = { pomodoro: 'tag-accent', short: 'tag-green', long: 'tag-cyan', custom: 'tag-amber' }[s.mode] || 'tag-accent';
+            return `
+            <div class="session-item" id="sess-${s.id}">
+                <div class="session-info">
+                    <span class="session-label">${escHtml(s.label)}</span>
+                    <span class="session-meta">${dateStr} · ${s.mins} min</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                    <span class="tag ${tagClass}">${s.mode}</span>
+                    <div class="session-actions">
+                        <button class="btn btn-ghost" style="padding:.25rem .5rem;font-size:.8rem;" 
+                            onclick="deleteSession(${s.id})" aria-label="Delete session">✕</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        }).join('');
+    }
+
+    function deleteSession(id) {
+        fetch(`/api/sessions/${id}`, { method: 'DELETE' }).then(() => {
+            sessions = sessions.filter(s => s.id !== id);
+            renderSessions();
+            showToast('🗑 Session removed', 'info');
+        });
+    }
+
+    function clearAllSessions() {
+        if (!confirm('Clear all session history?')) return;
+        Promise.all(sessions.map(s => fetch(`/api/sessions/${s.id}`, { method: 'DELETE' }))).then(() => {
+            sessions = [];
+            renderSessions();
+            showToast('🧹 History cleared', 'info');
+        });
+    }
+
+    // ── REPORTS ────────────────────────────────────────────────────
+    let activeReport = 'weekly';
+
+    function loadReport(period, btn) {
+        activeReport = period;
+        ['repWeek', 'repMonth', 'repYear'].forEach(id => {
+            document.getElementById(id).classList.remove('active');
+        });
+        btn.classList.add('active');
+        fetch(`/api/report/${period}`).then(r => r.json()).then(data => {
+            document.getElementById('statSessions').textContent = data.sessions;
+            document.getElementById('statHours').textContent = data.hours;
+            document.getElementById('statMins').textContent = data.total_mins;
+            renderLabelChart(data.by_label || {});
+        });
+    }
+
+    function renderLabelChart(byLabel) {
+        const chart = document.getElementById('labelChart');
+        const entries = Object.entries(byLabel);
+        if (!entries.length) {
+            chart.innerHTML = '<div class="empty-state" style="width:100%"><div class="empty-state-icon">📈</div>Complete sessions to see chart</div>';
+            return;
+        }
+        const maxVal = Math.max(...entries.map(([, v]) => v));
+        chart.innerHTML = entries.map(([label, mins]) => `
+        <div class="bar-wrap">
+            <div class="bar" style="height:${Math.max(8, (mins / maxVal) * 100)}px;" title="${label}: ${mins} min"></div>
+            <div class="bar-label">${label.slice(0, 8)}</div>
+        </div>
+    `).join('');
+    }
+
+    // ── UTILITIES ──────────────────────────────────────────────────
+    function escHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function showToast(msg, type = 'info') {
+        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+        <span class="toast-text">${msg}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+    `;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+</script>
+{% endblock %}

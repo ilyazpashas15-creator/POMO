@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Modal Close</title>
+  <style>
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    
+    .modal-overlay.hidden {
+      display: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .modal {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    
+    button {
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .google-btn {
+      background: #4285f4;
+      color: white;
+    }
+    
+    .close-btn {
+      background: #dc2626;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; margin-top: 50px;">Modal Close Test</h1>
+  <div style="text-align: center;">
+    <button onclick="openModal()" style="padding: 15px 30px; font-size: 18px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer;">
+      Open Login Modal
+    </button>
+  </div>
+
+  <div id="auth-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Welcome to Pomo</h2>
+      <p>Log in or sign up to continue</p>
+      <button class="google-btn" onclick="loginWithGoogle()">Continue with Google</button>
+      <br>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 10000;"></div>
+
+  <script>
+    function openModal() {
+      const overlay = document.getElementById('auth-overlay');
+      overlay.classList.remove('hidden');
+      console.log('Modal opened, classes:', overlay.className);
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById('auth-overlay');
+      overlay.classList.add('hidden');
+      console.log('Modal closed, classes:', overlay.className);
+    }
+
+    function loginWithGoogle() {
+      console.log('Google login clicked');
+      showToast('Successfully logged in via Google', 'success');
+      setTimeout(() => {
+        closeModal();
+      }, 1200);
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
+        min-width: 300px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+      `;
+
+      const icon = type === 'success' ? '✅' : '❌';
+      toast.innerHTML = `
+        <span style="font-size: 20px;">${icon}</span>
+        <span style="flex: 1; color: #4ade80;">${message}</span>
+        <button onclick="this.parentElement.remove()" style="
+          background: none;
+          border: none;
+          color: rgba(255,255,255,0.6);
+          cursor: pointer;
+          font-size: 18px;
+        ">✕</button>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>

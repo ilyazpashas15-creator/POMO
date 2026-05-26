@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Diagnostics</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { color: #ed2c6d; margin-bottom: 10px; }
+    .subtitle { color: #94a3b8; margin-bottom: 30px; }
+    button {
+      padding: 15px 30px;
+      margin: 10px 5px;
+      background: linear-gradient(135deg, #ed2c6d, #c2185b);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(237, 44, 109, 0.4);
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .test-section {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border-left: 4px solid #ed2c6d;
+    }
+    .log {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .log-entry {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .info { color: #3b82f6; }
+    .warning { color: #f59e0b; }
+    #volume-control {
+      margin: 20px 0;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin: 10px 0;
+    }
+    .url-display {
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      word-break: break-all;
+      margin: 10px 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Audio Diagnostics Tool</h1>
+  <p class="subtitle">Let's figure out why music isn't playing</p>
+  
+  <div class="test-section">
+    <h3>Step 1: Test System Audio</h3>
+    <p>First, let's test if your browser can play audio at all:</p>
+    <button onclick="testSystemAudio()">🔊 Test System Audio (Beep)</button>
+    <button onclick="stopAll()">⏹ Stop All</button>
+  </div>
+  
+  <div class="test-section">
+    <h3>Step 2: Test Pixabay URLs</h3>
+    <p>Test the actual URLs used in your Pomo app:</p>
+    <button onclick="testPixabayURL1()">Test URL 1 (Power Up)</button>
+    <button onclick="testPixabayURL2()">Test URL 2 (Deep Focus)</button>
+    <button onclick="testPixabayURL3()">Test URL 3 (Calm Waves)</button>
+  </div>
+  
+  <div class="test-section">
+    <h3>Step 3: Volume Control</h3>
+    <div id="volume-control">
+      <label>Volume: <span id="volumeLabel">50%</span></label>
+      <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="updateVolume(this.value)">
+    </div>
+    <p style="font-size: 14px; color: #f59e0b;">⚠️ Make sure your system volume is also turned up!</p>
+  </div>
+  
+  <div class="test-section">
+    <h3>📋 Diagnostic Log</h3>
+    <div class="log" id="log"></div>
+    <button onclick="clearLog()">Clear Log</button>
+    <button onclick="copyLog()">Copy Log</button>
+  </div>
+  
+  <div class="test-section">
+    <h3>🔧 System Info</h3>
+    <div id="systemInfo" style="font-size: 13px; line-height: 1.8;"></div>
+  </div>
+  
+  <script>
+    let audio = new Audio();
+    let audioContext = null;
+    
+    const urls = {
+      powerUp: 'https://cdn.pixabay.com/audio/2022/03/23/audio_b88a5efc61.mp3',
+      deepFocus: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3',
+      calmWaves: 'https://cdn.pixabay.com/audio/2022/03/24/audio_c2c6d0aa00.mp3'
+    };
+    
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+      console.log(message);
+    }
+    
+    function clearLog() {
+      document.getElementById('log').innerHTML = '';
+    }
+    
+    function copyLog() {
+      const logText = document.getElementById('log').innerText;
+      navigator.clipboard.writeText(logText).then(() => {
+        alert('Log copied to clipboard!');
+      });
+    }
+    
+    function updateVolume(value) {
+      audio.volume = value / 100;
+      document.getElementById('volumeLabel').textContent = value + '%';
+      log(`Volume set to ${value}%`, 'info');
+    }
+    
+    function stopAll() {
+      audio.pause();
+      audio.currentTime = 0;
+      log('All audio stopped', 'info');
+    }
+    
+    function testSystemAudio() {
+      log('Testing system audio with synthesized beep...', 'info');
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 440; // A4 note
+        gainNode.gain.value = 0.3;
+        
+        oscillator.start();
+        setTimeout(() => {
+          oscillator.stop();
+          log('✅ System audio test complete! Did you hear a beep?', 'success');
+        }, 500);
+        
+      } catch (err) {
+        log('❌ System audio test failed: ' + err.message, 'error');
+      }
+    }
+    
+    function testPixabayURL(url, name) {
+      log(`Testing ${name}...`, 'info');
+      log(`URL: ${url}`, 'info');
+      
+      audio.src = url;
+      audio.volume = 0.5;
+      audio.currentTime = 0;
+      
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            log(`✅ SUCCESS! ${name} is playing!`, 'success');
+            log('If you can\'t hear it, check your system volume!', 'warning');
+          })
+          .catch(err => {
+            log(`❌ FAILED to play ${name}`, 'error');
+            log(`Error: ${err.message}`, 'error');
+            log(`Error name: ${err.name}`, 'error');
+          });
+      }
+    }
+    
+    function testPixabayURL1() {
+      testPixabayURL(urls.powerUp, 'Power Up');
+    }
+    
+    function testPixabayURL2() {
+      testPixabayURL(urls.deepFocus, 'Deep Focus');
+    }
+    
+    function testPixabayURL3() {
+      testPixabayURL(urls.calmWaves, 'Calm Waves');
+    }
+    
+    // Audio event listeners
+    audio.addEventListener('loadstart', () => {
+      log('📥 Loading audio...', 'info');
+    });
+    
+    audio.addEventListener('canplay', () => {
+      log('✅ Audio loaded and ready', 'success');
+    });
+    
+    audio.addEventListener('playing', () => {
+      log('▶ Audio is playing', 'success');
+    });
+    
+    audio.addEventListener('error', (e) => {
+      log('❌ Audio error occurred', 'error');
+      log(`Error type: ${e.type}`, 'error');
+      if (audio.error) {
+        log(`Error code: ${audio.error.code}`, 'error');
+        log(`Error message: ${audio.error.message}`, 'error');
+      }
+    });
+    
+    audio.addEventListener('ended', () => {
+      log('✅ Audio finished playing', 'success');
+    });
+    
+    // Display system info
+    function displaySystemInfo() {
+      const info = document.getElementById('systemInfo');
+      info.innerHTML = `
+        <strong>Browser:</strong> ${navigator.userAgent}<br>
+        <strong>Platform:</strong> ${navigator.platform}<br>
+        <strong>Audio Context:</strong> ${window.AudioContext ? 'Supported' : 'Not supported'}<br>
+        <strong>Online:</strong> ${navigator.onLine ? 'Yes' : 'No'}<br>
+        <strong>Cookies Enabled:</strong> ${navigator.cookieEnabled ? 'Yes' : 'No'}
+      `;
+    }
+    
+    // Initialize
+    updateVolume(50);
+    displaySystemInfo();
+    log('🔍 Diagnostic tool ready', 'success');
+    log('Click the buttons above to test audio playback', 'info');
+  </script>
+</body>
+</html>

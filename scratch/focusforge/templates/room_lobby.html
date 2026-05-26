@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}FocusForge — Study Rooms{% endblock %}
+{% block meta_desc %}Join or create a FocusForge Study Room for real-time collaborative focus sessions.{% endblock %}
+
+{% block content %}
+<div style="max-width:880px; margin: 2rem auto;">
+
+    <div style="text-align:center; margin-bottom:2.5rem;">
+        <div class="hero-badge" style="display:inline-flex;">🧑‍💻 Study Together</div>
+        <h1 style="font-size:2.2rem; font-weight:900; letter-spacing:-.04em; margin:.5rem 0;">
+            Study Rooms
+        </h1>
+        <p style="color:var(--text-2); font-size:1rem;">
+            Share a room code with friends — see each other's timers, chat live, and share files.
+        </p>
+    </div>
+
+    <!-- Create / Join -->
+    <div class="card" style="padding:2rem; margin-bottom:2rem;">
+        <div class="grid-2">
+            <!-- Create a room -->
+            <div style="display:flex; flex-direction:column; gap:.75rem;">
+                <div class="section-title">🆕 Create a New Room</div>
+                <input type="text" id="newRoomName" placeholder="Room name (e.g. Math Study Group)"
+                    aria-label="Room name" maxlength="40">
+                <button class="btn btn-primary" onclick="createRoom()" id="btnCreate" aria-label="Create study room">
+                    ⚡ Create Room
+                </button>
+            </div>
+            <!-- Join a room -->
+            <div style="display:flex; flex-direction:column; gap:.75rem;">
+                <div class="section-title">🔗 Join Existing Room</div>
+                <input type="text" id="joinCode" placeholder="Enter room code..." aria-label="Room code" maxlength="20"
+                    style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+                <input type="text" id="joinName" placeholder="Your display name" aria-label="Your name" maxlength="30">
+                <button class="btn btn-secondary" onclick="joinRoom()" aria-label="Join room">→ Join Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured rooms (pre-seeded) -->
+    <div class="section-header">
+        <span class="section-title">📚 Featured Rooms</span>
+    </div>
+    <div class="room-grid">
+        <div class="room-card" onclick="goRoom('MATH101')">
+            <div class="room-card-icon">🔢</div>
+            <div class="room-card-name">Math Study</div>
+            <div class="room-card-meta">Room: MATH101</div>
+        </div>
+        <div class="room-card" onclick="goRoom('CODELAB')">
+            <div class="room-card-icon">💻</div>
+            <div class="room-card-name">Code Lab</div>
+            <div class="room-card-meta">Room: CODELAB</div>
+        </div>
+        <div class="room-card" onclick="goRoom('READCLUB')">
+            <div class="room-card-icon">📖</div>
+            <div class="room-card-name">Reading Club</div>
+            <div class="room-card-meta">Room: READCLUB</div>
+        </div>
+        <div class="room-card" onclick="goRoom('EXAMSQUAD')">
+            <div class="room-card-icon">📝</div>
+            <div class="room-card-name">Exam Squad</div>
+            <div class="room-card-meta">Room: EXAMSQUAD</div>
+        </div>
+        <div class="room-card" onclick="goRoom('NIGHTOWLS')">
+            <div class="room-card-icon">🦉</div>
+            <div class="room-card-name">Night Owls</div>
+            <div class="room-card-meta">Room: NIGHTOWLS</div>
+        </div>
+        <div class="room-card" onclick="goRoom('SCIENCELAB')">
+            <div class="room-card-icon">🔬</div>
+            <div class="room-card-name">Science Lab</div>
+            <div class="room-card-meta">Room: SCIENCELAB</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function createRoom() {
+        const name = document.getElementById('newRoomName').value.trim();
+        if (!name) { showToast('⚠ Please enter a room name', 'error'); return; }
+        // Generate room code from name
+        const code = name.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || 'ROOM' + Date.now().toString(36).toUpperCase().slice(-4);
+        goRoom(code);
+    }
+
+    function joinRoom() {
+        const code = document.getElementById('joinCode').value.trim();
+        const name = document.getElementById('joinName').value.trim();
+        if (!code) { showToast('⚠ Please enter a room code', 'error'); return; }
+        if (name) sessionStorage.setItem('ff_username', name);
+        goRoom(code);
+    }
+
+    function goRoom(code) {
+        window.location.href = `/room/${code}`;
+    }
+
+    function showToast(msg, type = 'info') {
+        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-text">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #1a1a2e;
+      color: white;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      background: #ed2c6d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #c2185b;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 Audio Playback Test</h1>
+  <p>Click the buttons below to test if audio plays:</p>
+  
+  <button onclick="testAudio1()">Test Audio 1 (Pixabay)</button>
+  <button onclick="testAudio2()">Test Audio 2 (Pixabay)</button>
+  <button onclick="testAudio3()">Test Audio 3 (Pixabay)</button>
+  <button onclick="stopAudio()">Stop Audio</button>
+  
+  <div id="status">Status: Ready</div>
+  
+  <script>
+    let audio = new Audio();
+    
+    function updateStatus(msg) {
+      document.getElementById('status').textContent = 'Status: ' + msg;
+    }
+    
+    function testAudio1() {
+      audio.src = 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3';
+      audio.volume = 0.5;
+      updateStatus('Loading audio 1...');
+      audio.play()
+        .then(() => updateStatus('✅ Playing audio 1!'))
+        .catch(err => updateStatus('❌ Error: ' + err.message));
+    }
+    
+    function testAudio2() {
+      audio.src = 'https://cdn.pixabay.com/audio/2022/03/10/audio_4e70e00c9c.mp3';
+      audio.volume = 0.5;
+      updateStatus('Loading audio 2...');
+      audio.play()
+        .then(() => updateStatus('✅ Playing audio 2!'))
+        .catch(err => updateStatus('❌ Error: ' + err.message));
+    }
+    
+    function testAudio3() {
+      audio.src = 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3';
+      audio.volume = 0.5;
+      updateStatus('Loading audio 3...');
+      audio.play()
+        .then(() => updateStatus('✅ Playing audio 3!'))
+        .catch(err => updateStatus('❌ Error: ' + err.message));
+    }
+    
+    function stopAudio() {
+      audio.pause();
+      audio.currentTime = 0;
+      updateStatus('⏹ Audio stopped');
+    }
+    
+    audio.addEventListener('error', (e) => {
+      updateStatus('❌ Audio error: ' + e.type);
+      console.error('Audio error:', e);
+    });
+    
+    audio.addEventListener('loadstart', () => {
+      updateStatus('Loading...');
+    });
+    
+    audio.addEventListener('canplay', () => {
+      updateStatus('Ready to play!');
+    });
+  </script>
+</body>
+</html>

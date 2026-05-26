@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Power Up Track</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #1a1a2e;
+      color: white;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 { color: #ed2c6d; }
+    button {
+      padding: 15px 30px;
+      margin: 10px;
+      background: #ed2c6d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #c2185b;
+      transform: scale(1.05);
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    #status {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      border-left: 4px solid #ed2c6d;
+    }
+    .success { border-left-color: #10b981; }
+    .error { border-left-color: #ef4444; }
+    .info { border-left-color: #3b82f6; }
+    #volume-control {
+      margin: 20px 0;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔥 Power Up Track Test</h1>
+  <p>Testing the "Power Up" audio track from Pixabay</p>
+  
+  <div>
+    <button onclick="testPowerUp()" id="playBtn">▶ Play Power Up</button>
+    <button onclick="stopAudio()" id="stopBtn" disabled>⏹ Stop</button>
+  </div>
+  
+  <div id="volume-control">
+    <label>Volume: <span id="volumeLabel">50%</span></label>
+    <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="updateVolume(this.value)">
+  </div>
+  
+  <div id="status">
+    <strong>Status:</strong> Ready to test
+  </div>
+  
+  <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+    <strong>Track Info:</strong><br>
+    Name: Power Up<br>
+    URL: <code style="font-size: 11px; word-break: break-all;">https://cdn.pixabay.com/audio/2022/03/23/audio_b88a5efc61.mp3</code><br>
+    Duration: 3:30<br>
+    Source: Pixabay
+  </div>
+  
+  <script>
+    let audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    
+    function updateStatus(msg, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerHTML = '<strong>Status:</strong> ' + msg;
+      statusDiv.className = type;
+    }
+    
+    function updateVolume(value) {
+      audio.volume = value / 100;
+      document.getElementById('volumeLabel').textContent = value + '%';
+    }
+    
+    function testPowerUp() {
+      const playBtn = document.getElementById('playBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      
+      playBtn.disabled = true;
+      stopBtn.disabled = false;
+      
+      audio.src = 'https://cdn.pixabay.com/audio/2022/03/23/audio_b88a5efc61.mp3';
+      audio.volume = 0.5;
+      
+      updateStatus('Loading Power Up track...', 'info');
+      
+      audio.play()
+        .then(() => {
+          updateStatus('✅ SUCCESS! Power Up is playing! 🔥', 'success');
+          console.log('✅ Audio playing successfully');
+        })
+        .catch(err => {
+          updateStatus('❌ ERROR: ' + err.message, 'error');
+          console.error('❌ Play error:', err);
+          playBtn.disabled = false;
+          stopBtn.disabled = true;
+        });
+    }
+    
+    function stopAudio() {
+      audio.pause();
+      audio.currentTime = 0;
+      updateStatus('⏹ Audio stopped', 'info');
+      document.getElementById('playBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+    
+    // Event listeners
+    audio.addEventListener('error', (e) => {
+      updateStatus('❌ Audio loading error: ' + e.type, 'error');
+      console.error('Audio error:', e);
+      document.getElementById('playBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    });
+    
+    audio.addEventListener('loadstart', () => {
+      updateStatus('📥 Loading audio file...', 'info');
+    });
+    
+    audio.addEventListener('canplay', () => {
+      updateStatus('✅ Audio loaded and ready!', 'success');
+    });
+    
+    audio.addEventListener('playing', () => {
+      updateStatus('▶ Playing Power Up! 🔥', 'success');
+    });
+    
+    audio.addEventListener('ended', () => {
+      updateStatus('✅ Track finished playing', 'success');
+      document.getElementById('playBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    });
+    
+    // Set initial volume
+    updateVolume(50);
+  </script>
+</body>
+</html>
