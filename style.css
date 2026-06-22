@@ -6574,12 +6574,36 @@ input:checked+.toggle-track:before {
     display: flex !important;
   }
 
-  #lang-selector-btn,
-  #mode-selector-btn,
-  .mood-meter,
-  #btn-report,
+  /* Make header controls more compact on mobile */
+  .control-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .control-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .mood-meter {
+    padding: 4px 8px;
+  }
+
+  .mood-bar {
+    width: 50px;
+  }
+
+  .mood-label {
+    font-size: 0.55rem;
+  }
+
+  .mood-avatar {
+    font-size: 0.85rem;
+  }
+
   .header-divider {
-    display: none !important;
+    margin: 0 6px;
   }
 
   #timer-time {
@@ -6655,7 +6679,32 @@ input:checked+.toggle-track:before {
 
 @media (max-width: 520px) {
   .header-inner {
-    padding: 0 12px;
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  /* Even more compact on very small screens */
+  .control-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    gap: 3px;
+  }
+
+  .control-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .control-btn span {
+    display: none; /* Hide text, show only icons */
+  }
+
+  .mood-meter {
+    display: none; /* Hide focus meter on very small screens */
+  }
+
+  .header-divider {
+    display: none;
   }
 
   #main-content {
