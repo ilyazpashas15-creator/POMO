@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub OAuth Callback - Pomo</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a14;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .callback-container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #ed2c6d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            margin: 0 0 10px;
+            color: #ed2c6d;
+        }
+        p {
+            margin: 0;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="callback-container">
+        <div class="spinner"></div>
+        <h2>Processing GitHub Authentication</h2>
+        <p>Please wait while we complete your sign-in...</p>
+    </div>
+
+    <script>
+        // GitHub OAuth callback handler
+        function handleGitHubCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+
+            if (error) {
+                console.error('GitHub OAuth error:', error);
+                // Redirect back to main app with error
+                window.opener?.postMessage({ 
+                    type: 'github-oauth-error', 
+                    error: error 
+                }, window.location.origin);
+                window.close();
+                return;
+            }
+
+            if (code) {
+                // Use our local proxy to exchange the code for real user data
+                // We use window.location.origin to ensure we hit the Vite dev server
+                fetch(`${window.location.origin}/api/github/token?code=${code}`)
+                    .then(response => response.json())
+                    .then(userData => {
+                        if (userData.error) {
+                            throw new Error(userData.error_description || userData.error);
+                        }
+
+                        console.log('Real GitHub user data received:', userData);
+
+                        // Send user data back to the main window
+                        if (window.opener) {
+                            window.opener.postMessage({
+                                type: 'github-oauth-success',
+                                userData: userData
+                            }, window.location.origin);
+                            
+                            // Store temporarily for the main window to pick up
+                            localStorage.setItem('github-oauth-temp', JSON.stringify(userData));
+                            
+                            // Also call the callback directly if available
+                            if (window.opener.handleGitHubSignIn) {
+                                window.opener.handleGitHubSignIn(userData);
+                            }
+                        }
+                        
+                        // Close popup
+                        window.close();
+                    })
+                    .catch(error => {
+                        console.error('GitHub Auth Error:', error);
+                        document.body.innerHTML = `
+                            <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+                                <h2 style="color: #f87171;">Authentication Failed</h2>
+                                <p style="color: #fff;">${error.message}</p>
+                                <button onclick="window.close()" style="padding: 10px 20px; cursor: pointer; background: #333; color: white; border: none; border-radius: 5px;">Close Window</button>
+                            </div>
+                        `;
+                    });
+            } else {
+                console.error('No authorization code received');
+                window.close();
+            }
+        }
+
+        // Listen for messages from parent window
+        window.addEventListener('message', (event) => {
+            if (event.origin !== window.location.origin) return;
+            
+            if (event.data.type === 'github-oauth-success') {
+                // Handle successful OAuth
+                if (window.opener && window.opener.handleGitHubSignIn) {
+                    window.opener.handleGitHubSignIn(event.data.userData);
+                }
+            }
+        });
+
+        // Start the callback handling
+        handleGitHubCallback();
+    </script>
+</body>
+</html>

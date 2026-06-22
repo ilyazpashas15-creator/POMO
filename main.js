@@ -37,50 +37,40 @@ let state = {
     currentTrack: 0,
     enabled: false,
     currentPlaylist: 'focus'
-  }
+  },
+  modalAudio: null,
+  modalPlaying: false
 };
 
-// Music Library - ONLY 100% VERIFIED WORKING URLs
-// Pixabay URLs are unreliable - keeping only confirmed working ones
-// For more music, add YouTube Audio Library files to /public/music/
+// Music Library - reliable SoundHelix tracks
 const musicLibrary = {
   focus: [
-    { name: 'Deep Focus', url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Healing Strings', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Coffee Shop', url: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Calm Piano', url: 'https://cdn.pixabay.com/audio/2022/05/13/audio_c96e2bc4f5.mp3', duration: '3:00', source: 'Pixabay' }
-  ],
-  break: [
-    { name: 'Peaceful Piano', url: 'https://cdn.pixabay.com/audio/2022/05/13/audio_c96e2bc4f5.mp3', duration: '2:30', source: 'Pixabay' },
-    { name: 'Healing Strings', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Coffee Shop', url: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3', duration: '3:00', source: 'Pixabay' }
-  ],
-  energize: [
-    { name: 'Upbeat Energy', url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', duration: '4:00', source: 'Pixabay' },
-    { name: 'Energetic Vibes', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Inspiring Beat', url: 'https://cdn.pixabay.com/audio/2022/11/22/audio_0c2d3fb8d6.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Uplifting Vibes', url: 'https://cdn.pixabay.com/audio/2022/09/26/audio_1b51f1e3e5.mp3', duration: '4:00', source: 'Pixabay' }
+    { name: 'Deep Focus', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: '5:17', source: 'SoundHelix' },
+    { name: 'Coffee Shop', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', duration: '7:42', source: 'SoundHelix' },
+    { name: 'Calm Piano', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', duration: '6:24', source: 'SoundHelix' },
+    { name: 'Flow State', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3', duration: '5:03', source: 'SoundHelix' }
   ],
   relax: [
-    { name: 'Healing Strings', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Peaceful Piano', url: 'https://cdn.pixabay.com/audio/2022/05/13/audio_c96e2bc4f5.mp3', duration: '5:00', source: 'Pixabay' },
-    { name: 'Coffee Shop', url: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3', duration: '3:00', source: 'Pixabay' }
+    { name: 'Calm Waves', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', duration: '6:38', source: 'SoundHelix' },
+    { name: 'Healing Strings', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', duration: '8:12', source: 'SoundHelix' },
+    { name: 'Peaceful Piano', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', duration: '4:56', source: 'SoundHelix' }
   ],
   sleep: [
-    { name: 'Healing Strings', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:30', source: 'Pixabay' },
-    { name: 'Deep Sleep', url: 'https://cdn.pixabay.com/audio/2022/05/13/audio_c96e2bc4f5.mp3', duration: '6:00', source: 'Pixabay' },
-    { name: 'Calm Ambient', url: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3', duration: '3:00', source: 'Pixabay' }
+    { name: 'Dream Drift', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', duration: '6:55', source: 'SoundHelix' },
+    { name: 'Deep Sleep', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', duration: '7:18', source: 'SoundHelix' },
+    { name: 'Calm Ambient', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', duration: '5:31', source: 'SoundHelix' }
   ],
   nature: [
-    { name: 'Nature Sounds', url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', duration: '4:00', source: 'Pixabay' },
-    { name: 'Ambient Nature', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Peaceful Sounds', url: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3', duration: '3:00', source: 'Pixabay' }
+    { name: 'Forest Morning', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', duration: '7:04', source: 'SoundHelix' },
+    { name: 'Ocean Waves', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', duration: '5:17', source: 'SoundHelix' },
+    { name: 'Rainy Window', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', duration: '4:22', source: 'SoundHelix' },
+    { name: 'Nature Sounds', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3', duration: '6:41', source: 'SoundHelix' }
   ],
   motivate: [
-    { name: 'Inspiring Beat', url: 'https://cdn.pixabay.com/audio/2022/11/22/audio_0c2d3fb8d6.mp3', duration: '3:00', source: 'Pixabay' },
-    { name: 'Uplifting Vibes', url: 'https://cdn.pixabay.com/audio/2022/09/26/audio_1b51f1e3e5.mp3', duration: '4:00', source: 'Pixabay' },
-    { name: 'Upbeat Energy', url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', duration: '4:00', source: 'Pixabay' },
-    { name: 'Energetic Flow', url: 'https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3', duration: '3:00', source: 'Pixabay' }
+    { name: 'Epic Motivation', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', duration: '5:47', source: 'SoundHelix' },
+    { name: 'Power Up', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', duration: '6:13', source: 'SoundHelix' },
+    { name: 'Inspiring Beat', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', duration: '5:17', source: 'SoundHelix' },
+    { name: 'Uplifting Vibes', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', duration: '7:42', source: 'SoundHelix' }
   ]
 };
 
@@ -467,6 +457,7 @@ function updateTimerDisplay() {
 function startTimer() {
   if (state.isRunning) return;
   state.isRunning = true;
+  document.body.setAttribute('data-timer-running', 'true');
   const btnStart = $('#btn-start');
   if (btnStart) {
     btnStart.innerHTML = `
@@ -502,6 +493,7 @@ function startTimer() {
 
 function pauseTimer() {
   state.isRunning = false;
+  document.body.removeAttribute('data-timer-running');
   clearInterval(state.intervalId);
   state.intervalId = null;
   const btnStart = $('#btn-start');
@@ -649,7 +641,6 @@ function playAlarm() {
 function initMusicPlayer() {
   if (!state.bgMusic.audio) {
     state.bgMusic.audio = new Audio();
-    state.bgMusic.audio.crossOrigin = "anonymous";
     state.bgMusic.audio.addEventListener('ended', () => {
       playNextTrack();
     });
@@ -1410,7 +1401,13 @@ function initSidebar() {
 
   // Open triggers
   const btnLoginHeader = $('#btn-login');
-  if (btnLoginHeader) btnLoginHeader.addEventListener('click', openAuthModal);
+  console.log('Sign-up button found:', btnLoginHeader);
+  if (btnLoginHeader) {
+    btnLoginHeader.addEventListener('click', openAuthModal);
+    console.log('Sign-up button click handler attached');
+  } else {
+    console.error('Sign-up button not found! Looking for #btn-login');
+  }
 
   const drLogin = $('#dr-login');
   if (drLogin) drLogin.addEventListener('click', openAuthModal);
@@ -1424,7 +1421,7 @@ function initSidebar() {
 
   if (authOverlay) {
     authOverlay.addEventListener('click', (e) => {
-      if (e.target === authOverlay) closeAuthModal(e);
+      if (e.target === authOverlay && !window._trialExpired) closeAuthModal(e);
     });
   }
 
@@ -1435,30 +1432,462 @@ function initSidebar() {
       e.preventDefault();
       console.log('Google button clicked');
       
-      // Check if Google Sign-In is loaded
-      if (typeof google !== 'undefined' && google.accounts) {
-        // Trigger Google Sign-In popup
-        google.accounts.id.prompt();
-      } else {
-        // Fallback to dummy login if Google SDK not loaded
-        console.warn('Google Sign-In SDK not loaded, using fallback');
-        const originalText = authGoogleBtn.innerHTML;
-        authGoogleBtn.innerHTML = '<span style="opacity:0.7">Authenticating...</span>';
-        setTimeout(() => {
-          console.log('Timeout complete, restoring button and closing modal');
-          authGoogleBtn.innerHTML = originalText;
-          closeAuthModal();
-          showToast('Successfully logged in via Google.');
-        }, 1200);
+      // Check if Google SDK is loaded and client ID is configured
+      const clientId = document.querySelector('#g_id_onload')?.getAttribute('data-client_id');
+      console.log('Google Client ID found:', clientId);
+      
+      const isGooglePlaceholder = !clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE' || clientId.startsWith('%VITE_') || clientId.startsWith('YOUR_');
+      console.log('Is placeholder?', isGooglePlaceholder);
+      console.log('Google SDK available?', typeof google !== 'undefined' && google.accounts);
+      
+      const originalText = authGoogleBtn.innerHTML;
+      
+      // Use direct Google OAuth URL with implicit flow (returns id_token in URL fragment)
+      const googleClientId = '924419504630-4o5f3o2f1mo5m8q5uhjr34fceoa9f5k6.apps.googleusercontent.com';
+      const googleRedirectUri = 'http://localhost:5174/auth/google/callback';
+      const googleScope = 'openid email profile';
+      const googleState = Math.random().toString(36).substring(2, 15);
+      const googleNonce = Math.random().toString(36).substring(2, 15);
+      
+      // Store state and nonce for validation
+      localStorage.setItem('google-oauth-state', googleState);
+      localStorage.setItem('google-oauth-nonce', googleNonce);
+      
+      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(googleRedirectUri)}&scope=${encodeURIComponent(googleScope)}&response_type=token%20id_token&state=${googleState}&nonce=${googleNonce}`;
+      
+      console.log('Opening Google OAuth URL:', googleAuthUrl);
+      
+      // Show loading state
+      authGoogleBtn.innerHTML = `
+        <div class="social-icon-wrapper">
+          <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+            <g transform="translate(0,0)">
+              <path d="M23.6 12.2c0-.8-.1-1.6-.2-2.3H12v4.5h6.6c-.3 1.5-1.1 2.7-2.3 3.5v2.9h3.7c2.2-2 3.5-5 3.5-8.6z" fill="#4285F4" />
+              <path d="M12 24c3.2 0 6-1.1 8-2.9l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.3 0-6.1-2.2-7.1-5.3H1.1v3.1C3.2 21.4 7.3 24 12 24z" fill="#34A853" />
+              <path d="M1.1 13.9V10.8h6c.3 1.6 1.3 3 2.7 3.9l3.7-2.9c-1.6-1.4-3.7-2.3-6.4-2.3-4.7 0-8.8 2.6-10.9 6.4z" fill="#FBBC05" />
+              <path d="M12 4.8c1.8 0 3.4.6 4.6 1.8l3.4-3.4C17.9 1.2 15.1 0 12 0 7.3 0 3.2 2.6 1.1 6.4l3.8 3c1-3.1 3.8-5.3 7.1-5.3z" fill="#EA4335" />
+            </g>
+          </svg>
+        </div>
+        <span>Redirecting to Google...</span>
+      `;
+      authGoogleBtn.disabled = true;
+      
+      // Open Google OAuth in a popup window
+      const popup = window.open(googleAuthUrl, 'google-oauth', 'width=500,height=600,scrollbars=yes,resizable=yes');
+      
+      // Check if popup was blocked
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        // Popup was blocked - open in same window instead
+        console.warn('Popup blocked, opening in same window');
+        authGoogleBtn.innerHTML = originalText;
+        authGoogleBtn.disabled = false;
+        window.location.href = googleAuthUrl;
+        return;
       }
+
+      // Reset processed flag before opening popup
+      window.__googleAuthProcessed = false;
+      
+      // Monitor popup for closure
+      const checkClosed = setInterval(() => {
+        try {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            authGoogleBtn.innerHTML = originalText;
+            authGoogleBtn.disabled = false;
+
+            // If already processed by postMessage listener, skip
+            if (window.__googleAuthProcessed) {
+              window.__googleAuthProcessed = false;
+              return;
+            }
+            
+            // Check if we received a success callback
+            const googleUser = localStorage.getItem('google-oauth-success');
+            if (googleUser) {
+              const userData = JSON.parse(googleUser);
+              localStorage.removeItem('google-oauth-success');
+              
+              // Store user info
+              localStorage.setItem('pomo-user', JSON.stringify(userData));
+              
+              // Update UI
+              const headerUsername = $('.header-username');
+              if (headerUsername) headerUsername.textContent = userData.name;
+              
+              const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
+              if (headerAvatar) headerAvatar.textContent = userData.avatar || '👤';
+              
+              // Close modal
+              closeAuthModal();
+              
+              // Show success
+              showToast(`Welcome, ${userData.name}! 🎉`);
+            } else {
+              // Popup was closed without success - fall back to demo mode
+              console.warn('Google OAuth popup closed without success, using demo mode');
+              
+              const demoUsers = [
+                { name: 'Alex Johnson', email: 'alex@example.com', avatar: '👨‍💻' },
+                { name: 'Sarah Chen', email: 'sarah@example.com', avatar: '👩‍🎨' },
+                { name: 'Mike Rodriguez', email: 'mike@example.com', avatar: '👨‍🚀' },
+                { name: 'Emma Wilson', email: 'emma@example.com', avatar: '👩‍🔬' }
+              ];
+              
+              const randomUser = demoUsers[Math.floor(Math.random() * demoUsers.length)];
+              
+              // Store user info
+              localStorage.setItem('pomo-user', JSON.stringify(randomUser));
+              
+              // Update UI
+              const headerUsername = $('.header-username');
+              if (headerUsername) headerUsername.textContent = randomUser.name;
+              
+              const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
+              if (headerAvatar) headerAvatar.textContent = randomUser.avatar;
+              
+              // Close modal
+              closeAuthModal();
+              
+              // Show success with demo indicator
+              showToast(`Welcome, ${randomUser.name}! 🎉 (Demo Mode - Google OAuth needs backend setup)`);
+            }
+          }
+        } catch (e) {
+          // Error checking popup - might be closed
+          clearInterval(checkClosed);
+          authGoogleBtn.innerHTML = originalText;
+          authGoogleBtn.disabled = false;
+        }
+      }, 1000);
     });
   } else {
     console.error('Google button not found!');
   }
 
+  // Listen for Google OAuth success messages from the popup
+  window.addEventListener('message', function onGoogleOAuthMessage(event) {
+    if (event.origin !== window.location.origin) return;
+    if (!event.data || event.data.type !== 'google-oauth-success') return;
+
+    console.log('Received Google OAuth success via postMessage');
+    const userData = event.data.user;
+
+    // Remove success flag so polling fallback doesn't re-process
+    localStorage.removeItem('google-oauth-success');
+
+    // Store user info
+    localStorage.setItem('pomo-user', JSON.stringify(userData));
+
+    // Mark as processed
+    window.__googleAuthProcessed = true;
+
+    // Update UI
+    const headerUsername = $('.header-username');
+    if (headerUsername) headerUsername.textContent = userData.name;
+
+    const headerAvatar = $('.header-avatar-v2');
+    if (headerAvatar) {
+      if (userData.picture) {
+        headerAvatar.innerHTML = '<img src="' + userData.picture + '" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+      } else {
+        headerAvatar.innerHTML = '<span class="avatar-emoji">' + (userData.avatar || '👤') + '</span>';
+      }
+    }
+
+    // Close modal
+    closeAuthModal();
+
+    // Update UI state to "Logged In"
+    const btnLogin = $('#btn-login');
+    if (btnLogin) btnLogin.classList.add('hidden');
+
+    const drLoginSpan = $('#dr-login span');
+    if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+
+    // Sync to main config so Profile Modal is updated
+    if (typeof config !== 'undefined') {
+      config.user = {
+        ...config.user,
+        username: userData.name,
+        email: userData.email || '',
+        bio: ''
+      };
+      saveConfig();
+    }
+
+    // Reset trial flag and restore buttons
+    window._trialExpired = false;
+    if (typeof window.restoreAuthButtons === 'function') window.restoreAuthButtons();
+
+    // Show success
+    showToast(`Welcome, ${userData.name}! 🎉`);
+  });
+
+  // Listen for GitHub OAuth success messages from the popup
+  window.addEventListener('message', function onGitHubOAuthMessage(event) {
+    if (event.origin !== window.location.origin) return;
+    if (!event.data || event.data.type !== 'github-oauth-success') return;
+
+    console.log('Received GitHub OAuth success via postMessage');
+    const userData = event.data.userData;
+
+    // Remove temp flag so polling fallback doesn't re-process
+    localStorage.removeItem('github-oauth-temp');
+
+    // Mark as processed
+    window.__githubAuthProcessed = true;
+
+    // Use the existing handler
+    if (typeof window.handleGitHubSignIn === 'function') {
+      window.handleGitHubSignIn(userData);
+    }
+  });
+
+  // GitHub Sign-In functionality
+  const authGitHubBtn = $('#github-signin-btn');
+  if (authGitHubBtn) {
+    authGitHubBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('GitHub button clicked');
+      
+      // Check if GitHub OAuth is configured
+      const clientId = document.querySelector('#github_oauth_config')?.getAttribute('data-github-client-id');
+      const redirectUri = document.querySelector('#github_oauth_config')?.getAttribute('data-redirect-uri');
+      
+      const isGithubPlaceholder = !clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE' || clientId.startsWith('%VITE_') || clientId.startsWith('YOUR_');
+      if (clientId && !isGithubPlaceholder) {
+        // Real GitHub OAuth flow
+        const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email read:user&state=${Math.random().toString(36).substring(7)}`;
+        
+        // Open GitHub OAuth in popup
+        const popup = window.open(githubAuthUrl, 'github-oauth', 'width=600,height=700,scrollbars=yes,resizable=yes');
+
+        // Reset processed flag
+        window.__githubAuthProcessed = false;
+        
+        // Listen for the OAuth callback
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+
+            // If already processed by postMessage listener, skip
+            if (window.__githubAuthProcessed) {
+              window.__githubAuthProcessed = false;
+              return;
+            }
+
+            // Check if we received user data (this would be handled by the callback)
+            const githubUser = localStorage.getItem('github-oauth-temp');
+            if (githubUser) {
+              handleGitHubSignIn(JSON.parse(githubUser));
+              localStorage.removeItem('github-oauth-temp');
+            }
+          }
+        }, 1000);
+        
+      } else {
+        // Fallback to demo login if GitHub OAuth not configured
+        console.warn('GitHub OAuth not configured, using demo mode');
+        
+        // Show loading state
+        const originalText = authGitHubBtn.innerHTML;
+        authGitHubBtn.innerHTML = `
+          <div class="social-icon-wrapper">
+            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" 
+                    fill="#333"/>
+            </svg>
+          </div>
+          <span>Signing in...</span>
+        `;
+        authGitHubBtn.disabled = true;
+        
+        // Simulate GitHub login with demo data
+        setTimeout(() => {
+          // Generate demo GitHub user data
+          const demoGitHubUsers = [
+            { 
+              name: 'CodeMaster Dev', 
+              email: 'codemaster@github.com', 
+              avatar: '👨‍💻',
+              username: 'codemaster-dev',
+              bio: 'Full-stack developer passionate about clean code'
+            },
+            { 
+              name: 'Luna Rodriguez', 
+              email: 'luna.codes@github.com', 
+              avatar: '👩‍💻',
+              username: 'luna-codes',
+              bio: 'Frontend engineer & UI/UX enthusiast'
+            },
+            { 
+              name: 'Alex Chen', 
+              email: 'alex.opensource@github.com', 
+              avatar: '🧑‍💻',
+              username: 'alex-opensource',
+              bio: 'Open source contributor & DevOps engineer'
+            },
+            { 
+              name: 'Maya Patel', 
+              email: 'maya.builds@github.com', 
+              avatar: '👩‍🔬',
+              username: 'maya-builds',
+              bio: 'Data scientist & machine learning researcher'
+            }
+          ];
+          
+          const randomUser = demoGitHubUsers[Math.floor(Math.random() * demoGitHubUsers.length)];
+          
+          // Store user info
+          localStorage.setItem('pomo-user', JSON.stringify({
+            name: randomUser.name,
+            email: randomUser.email,
+            avatar: randomUser.avatar,
+            provider: 'github',
+            username: randomUser.username,
+            bio: randomUser.bio
+          }));
+          
+          // Update UI
+          const headerUsername = $('.header-username');
+          if (headerUsername) headerUsername.textContent = randomUser.name;
+          
+          const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
+          if (headerAvatar) headerAvatar.textContent = randomUser.avatar;
+          
+          // Reset button
+          authGitHubBtn.innerHTML = originalText;
+          authGitHubBtn.disabled = false;
+          
+          // Close modal
+          closeAuthModal();
+          
+          // Show success with demo indicator
+          showToast(`Welcome, ${randomUser.name}! 🎉 (Demo Mode - Set up GitHub OAuth for real authentication)`);
+          
+        }, 1500);
+      }
+    });
+  } else {
+    console.error('GitHub button not found!');
+  }
+
+  // GitHub Sign-In callback handler
+  window.handleGitHubSignIn = function(userData) {
+    console.log('GitHub Sign-In successful!', userData);
+    
+    try {
+      // Store user info
+      localStorage.setItem('pomo-user', JSON.stringify({
+        name: userData.name || userData.login,
+        email: userData.email,
+        avatar: userData.avatar_url || '👤',
+        provider: 'github',
+        username: userData.login,
+        bio: userData.bio
+      }));
+      
+      // Update UI
+      const headerUsername = $('.header-username');
+      if (headerUsername) headerUsername.textContent = userData.name || userData.login;
+      
+      const headerAvatar = $('.header-avatar-v2');
+      if (headerAvatar) {
+        if (userData.avatar_url) {
+          headerAvatar.innerHTML = `<img src="${userData.avatar_url}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        } else {
+          headerAvatar.innerHTML = '<span class="avatar-emoji">👤</span>';
+        }
+      }
+      
+      // Close modal
+      closeAuthModal();
+      
+      // Show success
+      showToast(`Welcome, ${userData.name || userData.login}! 🎉`);
+
+      restoreAuthButtons();
+      window._trialExpired = false;
+
+      // Update UI state to "Logged In"
+      const btnLogin = $('#btn-login');
+      if (btnLogin) btnLogin.classList.add('hidden');
+      
+      const drLoginSpan = $('#dr-login span');
+      if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+
+      // Sync to main config so Profile Modal is updated
+      if (typeof config !== 'undefined') {
+        config.user = {
+          ...config.user,
+          username: userData.name || userData.login,
+          email: userData.email || '',
+          bio: userData.bio || ''
+        };
+        saveConfig();
+        
+        // Refresh header immediately
+        const hn = $('.header-username');
+        if (hn) hn.textContent = config.user.username;
+      }
+      
+    } catch (error) {
+      console.error('Error processing GitHub Sign-In:', error);
+      showToast('GitHub sign-in failed. Please try again.', 'error');
+    }
+  };
+
+  // Logout functionality
+  window.handleLogout = function() {
+    console.log('Logging out...');
+    
+    // Clear user data and guest trial
+    localStorage.removeItem('pomo-user');
+    localStorage.removeItem('pomo-guest-start');
+    if (typeof window.hideGuestTimer === 'function') window.hideGuestTimer();
+    
+    // Reset UI state to "Logged Out"
+    const btnLogin = $('#btn-login');
+    if (btnLogin) btnLogin.classList.remove('hidden');
+    
+    const drLoginSpan = $('#dr-login span');
+    if (drLoginSpan) drLoginSpan.textContent = 'Log In';
+    
+    const drLogin = $('#dr-login');
+    if (drLogin) {
+      const icon = drLogin.querySelector('svg');
+      if (icon) {
+        icon.innerHTML = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line>';
+      }
+    }
+    
+    // Reset username and avatar
+    const headerUsername = $('.header-username');
+    if (headerUsername) headerUsername.textContent = 'User';
+    
+    const headerAvatar = $('.header-avatar-v2');
+    if (headerAvatar) {
+      headerAvatar.innerHTML = '<span class="avatar-emoji">👤</span>';
+    }
+    
+    if (typeof config !== 'undefined') {
+      config.user = { ...DEFAULTS.user };
+      saveConfig();
+    }
+    
+    showToast('Logged out successfully. See you soon! 👋');
+  };
+
   // Google Sign-In callback function (called when user signs in)
   window.handleGoogleSignIn = function(response) {
     console.log('Google Sign-In successful!', response);
+    
+    if (window.__clearGoogleTimeout) {
+      window.__clearGoogleTimeout();
+      window.__clearGoogleTimeout = null;
+    }
     
     // Decode the JWT token to get user info
     const userInfo = parseJwt(response.credential);
@@ -1476,14 +1905,28 @@ function initSidebar() {
     const headerUsername = $('.header-username');
     if (headerUsername) headerUsername.textContent = userInfo.name;
     
-    const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
-    if (headerAvatar && userInfo.picture) {
-      headerAvatar.innerHTML = `<img src="${userInfo.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    const headerAvatar = $('.header-avatar-v2');
+    if (headerAvatar) {
+      if (userInfo.picture) {
+        headerAvatar.innerHTML = `<img src="${userInfo.picture}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+      } else {
+        headerAvatar.innerHTML = '<span class="avatar-emoji">👤</span>';
+      }
     }
     
     // Close modal and show success
     closeAuthModal();
     showToast(`Welcome, ${userInfo.name}! 🎉`);
+
+    restoreAuthButtons();
+    window._trialExpired = false;
+
+    // Update UI state to "Logged In"
+    const btnLogin = $('#btn-login');
+    if (btnLogin) btnLogin.classList.add('hidden');
+    
+    const drLoginSpan = $('#dr-login span');
+    if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
   };
 
   // Helper function to decode JWT token
@@ -1635,11 +2078,8 @@ function initSidebar() {
       setTimeout(() => {
         // Store user info
         const avatarEmoji = formAvatar.querySelector('.avatar-emoji').textContent;
-        localStorage.setItem('pomo-user', JSON.stringify({
-          name: name,
-          email: email,
-          avatar: avatarEmoji
-        }));
+        const userData = { name, email, avatar: avatarEmoji };
+        localStorage.setItem('pomo-user', JSON.stringify(userData));
         
         // Update UI
         const headerUsername = $('.header-username');
@@ -1647,6 +2087,26 @@ function initSidebar() {
         
         const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
         if (headerAvatar) headerAvatar.textContent = avatarEmoji;
+        
+        // Update login state
+        const btnLogin = $('#btn-login');
+        if (btnLogin) btnLogin.classList.add('hidden');
+        const drLoginSpan = $('#dr-login span');
+        if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+        
+        // Sync to config so Profile modal is updated
+        if (typeof config !== 'undefined') {
+          config.user = {
+            ...config.user,
+            username: name,
+            email: email,
+            avatar: avatarEmoji
+          };
+          saveConfig();
+        }
+        
+        restoreAuthButtons();
+        window._trialExpired = false;
         
         // Close modal
         closeAuthModal();
@@ -2286,7 +2746,7 @@ function initWellnessCorner() {
   $$('.mu-play-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const card = btn.closest('.mu-card');
-      const trackName = card.querySelector('h4').textContent;
+      const trackName = card.dataset.track || card.querySelector('h4').textContent;
       const category = card.dataset.cat;
       const isPlaying = btn.classList.contains('playing');
       
@@ -2297,33 +2757,35 @@ function initWellnessCorner() {
       });
       
       if (!isPlaying) {
-        // Find matching track in library
         let foundTrack = null;
         let foundPlaylist = null;
         
-        // Search through all playlists for matching track
-        for (const [playlistName, tracks] of Object.entries(musicLibrary)) {
-          const track = tracks.find(t => t.name.toLowerCase().includes(trackName.toLowerCase()) || trackName.toLowerCase().includes(t.name.toLowerCase()));
-          if (track) {
-            foundTrack = track;
-            foundPlaylist = playlistName;
-            break;
+        // Try matching by category + exact name first
+        if (musicLibrary[category]) {
+          foundTrack = musicLibrary[category].find(t => t.name === trackName);
+          if (foundTrack) foundPlaylist = category;
+        }
+        
+        // If not found, search all playlists by exact name
+        if (!foundTrack) {
+          for (const [playlistName, tracks] of Object.entries(musicLibrary)) {
+            foundTrack = tracks.find(t => t.name === trackName);
+            if (foundTrack) { foundPlaylist = playlistName; break; }
           }
         }
         
-        // If not found by name, use category to find playlist
+        // Fallback to first track in card's category
         if (!foundTrack && musicLibrary[category]) {
           foundPlaylist = category;
           foundTrack = musicLibrary[category][0];
         }
         
-        // Fallback to focus playlist
+        // Ultimate fallback
         if (!foundTrack) {
           foundPlaylist = 'focus';
           foundTrack = musicLibrary.focus[0];
         }
         
-        // Play the track
         if (foundTrack) {
           state.bgMusic.currentPlaylist = foundPlaylist;
           const trackIndex = musicLibrary[foundPlaylist].indexOf(foundTrack);
@@ -2333,8 +2795,8 @@ function initWellnessCorner() {
           btn.textContent = '⏸ Pause';
         }
       } else {
-        // Pause music
         pauseMusic();
+        state.bgMusic.enabled = false;
       }
     });
   });
@@ -3898,30 +4360,6 @@ function bindEvents() {
 
 
 
-  // User Profile Dropdown
-  const btnProfile = $('#header-user-btn');
-  const userDropdown = $('#user-dropdown');
-  if (btnProfile && userDropdown) {
-    btnProfile.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isVisible = !userDropdown.classList.contains('hidden');
-      if (isVisible) {
-        userDropdown.classList.add('hidden');
-        btnProfile.classList.remove('header-user-btn-active');
-      } else {
-        userDropdown.classList.remove('hidden');
-        btnProfile.classList.add('header-user-btn-active');
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!btnProfile.contains(e.target) && !userDropdown.contains(e.target)) {
-        userDropdown.classList.add('hidden');
-        btnProfile.classList.remove('header-user-btn-active');
-      }
-    });
-  }
-
   // Dropdown Items Actions
   const triggerChatCommand = (msg) => {
     const welcomeMsg = $('#welcome-message');
@@ -3965,15 +4403,15 @@ function bindEvents() {
   let currentStationIndex = 0;
 
   const setupAudio = () => {
-    if (!state.bgMusic.audio) {
-      state.bgMusic.audio = new Audio(stations[currentStationIndex].url);
-      state.bgMusic.audio.loop = true;
-      state.bgMusic.audio.volume = state.bgMusic.volume;
+    if (!state.bgMusic.modalAudio) {
+      state.bgMusic.modalAudio = new Audio(stations[currentStationIndex].url);
+      state.bgMusic.modalAudio.loop = true;
+      state.bgMusic.modalAudio.volume = state.bgMusic.volume;
     }
   };
 
   const updateMusicUI = () => {
-    const isPlaying = state.bgMusic.isPlaying;
+    const isPlaying = state.bgMusic.modalPlaying || false;
     const musicToggle = $('#music-toggle');
 
     if (trackTitle) trackTitle.textContent = stations[currentStationIndex].track;
@@ -3996,11 +4434,11 @@ function bindEvents() {
 
   const switchStation = (direction) => {
     currentStationIndex = (currentStationIndex + direction + stations.length) % stations.length;
-    const wasPlaying = state.bgMusic.isPlaying;
+    const wasPlaying = state.bgMusic.modalPlaying || false;
 
-    if (state.bgMusic.audio) {
-      state.bgMusic.audio.pause();
-      state.bgMusic.audio = null;
+    if (state.bgMusic.modalAudio) {
+      state.bgMusic.modalAudio.pause();
+      state.bgMusic.modalAudio = null;
     }
 
     if (wasPlaying) {
@@ -4012,14 +4450,14 @@ function bindEvents() {
 
   const toggleBGMusic = (forceState) => {
     setupAudio();
-    const targetState = forceState !== undefined ? forceState : !state.bgMusic.isPlaying;
+    const targetState = forceState !== undefined ? forceState : !state.bgMusic.modalPlaying;
 
     if (targetState) {
-      state.bgMusic.audio.play().catch(err => console.error('Playback error:', err));
-      state.bgMusic.isPlaying = true;
+      state.bgMusic.modalAudio.play().catch(err => console.error('Playback error:', err));
+      state.bgMusic.modalPlaying = true;
     } else {
-      state.bgMusic.audio.pause();
-      state.bgMusic.isPlaying = false;
+      state.bgMusic.modalAudio.pause();
+      state.bgMusic.modalPlaying = false;
     }
 
     updateMusicUI();
@@ -4036,6 +4474,7 @@ function bindEvents() {
       const vol = e.target.value / 100;
       state.bgMusic.volume = vol;
       if (state.bgMusic.audio) state.bgMusic.audio.volume = vol;
+      if (state.bgMusic.modalAudio) state.bgMusic.modalAudio.volume = vol;
     });
   }
 
@@ -4050,8 +4489,13 @@ function bindEvents() {
       if (sos) sos.classList.remove('hidden');
     },
     'dr-login': () => {
-      const signup = $('#signup-overlay');
-      if (signup) signup.classList.remove('hidden');
+      const drLoginSpan = $('#dr-login span');
+      if (drLoginSpan && drLoginSpan.textContent === 'Log Out') {
+        handleLogout();
+      } else {
+        const signup = $('#auth-overlay');
+        if (signup) signup.classList.remove('hidden');
+      }
     }
   };
 
@@ -4181,27 +4625,36 @@ function bindEvents() {
   });
 
   // Theme Switching Logic
+  const allThemeClasses = ['theme-cyber', 'theme-gold', 'theme-violet', 'theme-emerald', 'theme-ember', 'theme-ocean', 'theme-rose'];
+  const themeMessages = {
+    default: '<strong>Deep Slate Protocol</strong> active. Visual latency optimized.',
+    cyber: '<strong>Cyber Zen Interface</strong> initialized. Neon-sync active.',
+    gold: '<strong>Focus Gold Matrix</strong> online. Elite productivity mode enabled.',
+    violet: '<strong>Midnight Violet</strong> engaged. Shadow protocol activated.',
+    emerald: '<strong>Forest Emerald</strong> deployed. Nature-sync established.',
+    ember: '<strong>Sunset Ember</strong> burning bright. Heat-sync active.',
+    ocean: '<strong>Ocean Depths</strong> flowing. Deep current mode enabled.',
+    rose: '<strong>Rose Noir</strong> awakened. Elegance protocol online.'
+  };
+
+  function applyTheme(themeId) {
+    document.body.classList.remove(...allThemeClasses);
+    if (themeId !== 'default') {
+      document.body.classList.add('theme-' + themeId);
+    }
+  }
+
   const themeCards = $$('.theme-card');
   themeCards.forEach(card => {
     card.addEventListener('click', () => {
       themeCards.forEach(c => c.classList.remove('active'));
       card.classList.add('active');
 
-      const themeName = card.querySelector('span').textContent;
       const themeId = card.dataset.theme;
+      applyTheme(themeId);
+      localStorage.setItem('pomo-theme', themeId);
+      addChatMessage(themeMessages[themeId] || themeMessages.default, 'bot');
 
-      if (themeId === 'default') {
-        document.body.classList.remove('theme-cyber', 'theme-gold');
-        addChatMessage("<strong>Deep Slate Protocol</strong> active. Visual latency optimized.", 'bot');
-      } else if (themeId === 'cyber') {
-        document.body.classList.remove('theme-gold');
-        document.body.classList.add('theme-cyber');
-        addChatMessage("<strong>Cyber Zen Interface</strong> initialized. Neon-sync active.", 'bot');
-      } else if (themeId === 'gold') {
-        document.body.classList.remove('theme-cyber');
-        document.body.classList.add('theme-gold');
-        addChatMessage("<strong>Focus Gold Matrix</strong> online. Elite productivity mode enabled.", 'bot');
-      }
       // Close modal
       setTimeout(() => $('#themes-overlay').classList.add('hidden'), 300);
     });
@@ -4438,11 +4891,354 @@ function initHeroCycling() {
   }, 4000);
 }
 
+// --- Initialize Auth Modal and Dropdowns ---
+function initAuthAndDropdowns() {
+  console.log('Initializing auth modal and dropdowns...');
+  
+  // --- AUTH MODAL ---
+  const authOverlay = $('#auth-overlay');
+  console.log('Auth overlay found:', authOverlay);
+
+  function resetEmailForm() {
+    const authBody = $('.auth-body');
+    const emailForm = $('#email-signup-form');
+    if (authBody) authBody.classList.remove('form-active');
+    if (emailForm) emailForm.classList.add('hidden');
+    const authHeader = $('.auth-header h2');
+    if (authHeader) authHeader.textContent = 'Welcome to Pomo';
+    const authSubtext = $('.auth-header p');
+    if (authSubtext) authSubtext.textContent = 'Log in or sign up to continue';
+  }
+
+  const openAuthModal = (e, forceTrial = false) => {
+    if (e) e.preventDefault();
+    console.log('Opening auth modal...');
+    if (authOverlay) {
+      resetEmailForm();
+      if (!forceTrial) restoreAuthButtons();
+      authOverlay.classList.remove('hidden');
+      authOverlay.style.display = '';
+      authOverlay.style.visibility = '';
+      authOverlay.style.opacity = '';
+      console.log('Auth modal opened');
+    } else {
+      console.error('Auth overlay not found!');
+    }
+  };
+
+  window.openAuthModal = openAuthModal;
+
+  const closeAuthModal = (e) => {
+    if (e) e.preventDefault();
+    console.log('closeAuthModal called');
+    if (authOverlay) {
+      resetEmailForm();
+      authOverlay.classList.add('hidden');
+      authOverlay.style.display = 'none';
+      authOverlay.style.visibility = 'hidden';
+      authOverlay.style.opacity = '0';
+      console.log('Auth modal closed');
+    } else {
+      console.error('authOverlay element not found!');
+    }
+  };
+
+  window.closeAuthModal = closeAuthModal;
+
+  // Open triggers
+  const btnLoginHeader = $('#btn-login');
+  console.log('Sign-up button found:', btnLoginHeader);
+  if (btnLoginHeader) {
+    btnLoginHeader.addEventListener('click', openAuthModal);
+    console.log('Sign-up button click handler attached');
+  } else {
+    console.error('Sign-up button not found! Looking for #btn-login');
+  }
+
+  const drLogin = $('#dr-login');
+  if (drLogin) drLogin.addEventListener('click', openAuthModal);
+
+  const TRIAL_DURATION = 5 * 60 * 1000;
+  let guestTimerInterval = null;
+
+  window.restoreAuthButtons = function() {
+    const closeBtn = $('#close-auth');
+    const skipBtn = $('.auth-guest-btn');
+    const guestLink = $('.form-guest-link');
+    if (closeBtn) closeBtn.style.display = '';
+    if (skipBtn) skipBtn.style.display = '';
+    if (guestLink) guestLink.style.display = '';
+  };
+
+  function updateGuestTimer() {
+    const guestStart = localStorage.getItem('pomo-guest-start');
+    const timerEl = $('#guest-timer');
+    const minEl = $('#guest-timer-min');
+    const secEl = $('#guest-timer-sec');
+    const colonEl = $('#guest-timer-colon');
+    const barEl = $('#guest-timer-bar');
+    if (!guestStart || !timerEl || !minEl || !secEl) return;
+    const remaining = Math.max(0, TRIAL_DURATION - (Date.now() - parseInt(guestStart)));
+    const totalSec = Math.ceil(remaining / 1000);
+    const displaySec = totalSec;
+    const m = Math.floor(displaySec / 60);
+    const s = displaySec % 60;
+    minEl.textContent = m.toString().padStart(2, '0');
+    secEl.textContent = s.toString().padStart(2, '0');
+    if (colonEl) colonEl.style.opacity = (Math.floor(Date.now() / 500) % 2) ? '1' : '0.3';
+    const pct = (remaining / TRIAL_DURATION) * 100;
+    if (barEl) barEl.style.width = pct + '%';
+    const colorLow = '#ef4444';
+    const colorMid = '#f59e0b';
+    const colorNorm = '#fbbf24';
+    let color = colorNorm;
+    let bg = 'rgba(0, 0, 0, 0.35)';
+    let border = 'rgba(251, 191, 36, 0.15)';
+    let barBg = 'linear-gradient(90deg, #fbbf24, #f59e0b)';
+    let shadow = '0 0 6px rgba(251,191,36,0.5), 0 2px 3px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.2)';
+    if (totalSec <= 30) {
+      color = colorLow; border = 'rgba(239, 68, 68, 0.3)';
+      barBg = 'linear-gradient(90deg, #ef4444, #dc2626)';
+      shadow = '0 0 6px rgba(239,68,68,0.5), 0 2px 3px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.2)';
+    } else if (totalSec <= 60) {
+      color = colorMid; border = 'rgba(245, 158, 11, 0.25)';
+      barBg = 'linear-gradient(90deg, #f59e0b, #d97706)';
+      shadow = '0 0 6px rgba(245,158,11,0.5), 0 2px 3px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.2)';
+    }
+    timerEl.style.background = bg;
+    timerEl.style.borderColor = border;
+    if (barEl) barEl.style.background = barBg;
+    minEl.style.color = color;
+    secEl.style.color = color;
+    minEl.style.textShadow = shadow;
+    secEl.style.textShadow = shadow;
+    if (colonEl) {
+      colonEl.style.color = color;
+      colonEl.style.textShadow = shadow;
+    }
+  }
+
+  window.showGuestTimer = function() {
+    const timerEl = $('#guest-timer');
+    const minEl = $('#guest-timer-min');
+    const secEl = $('#guest-timer-sec');
+    const colonEl = $('#guest-timer-colon');
+    const barEl = $('#guest-timer-bar');
+    if (timerEl) {
+      timerEl.classList.remove('hidden');
+      timerEl.style.background = '';
+      timerEl.style.borderColor = '';
+    }
+    if (barEl) barEl.style.width = '100%';
+    if (minEl) { minEl.style.color = ''; minEl.style.textShadow = ''; }
+    if (secEl) { secEl.style.color = ''; secEl.style.textShadow = ''; }
+    if (colonEl) { colonEl.style.color = ''; colonEl.style.textShadow = ''; }
+    updateGuestTimer();
+  };
+
+  window.hideGuestTimer = function() {
+    const timerEl = $('#guest-timer');
+    const minEl = $('#guest-timer-min');
+    const secEl = $('#guest-timer-sec');
+    const colonEl = $('#guest-timer-colon');
+    const barEl = $('#guest-timer-bar');
+    if (timerEl) {
+      timerEl.classList.add('hidden');
+      timerEl.style.background = '';
+      timerEl.style.borderColor = '';
+    }
+    if (barEl) barEl.style.width = '';
+    if (minEl) { minEl.style.color = ''; minEl.style.textShadow = ''; }
+    if (secEl) { secEl.style.color = ''; secEl.style.textShadow = ''; }
+    if (colonEl) { colonEl.style.color = ''; colonEl.style.textShadow = ''; }
+  };
+
+  function startGuestSession() {
+    const now = Date.now();
+    localStorage.setItem('pomo-guest-start', now.toString());
+    localStorage.setItem('pomo-user', JSON.stringify({ name: 'Guest', email: '', avatar: '👤', guest: true }));
+
+    const headerUsername = $('.header-username');
+    if (headerUsername) headerUsername.textContent = 'Guest';
+    const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
+    if (headerAvatar) headerAvatar.textContent = '👤';
+
+    const btnLogin = $('#btn-login');
+    if (btnLogin) btnLogin.classList.add('hidden');
+    const drLoginSpan = $('#dr-login span');
+    if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+
+    if (typeof config !== 'undefined') {
+      config.user = { ...config.user, username: 'Guest', email: '', avatar: '👤', guest: true };
+      saveConfig();
+    }
+
+    closeAuthModal();
+    window.showGuestTimer();
+    const mins = 5;
+    showToast(`Guest mode activated! You have ${mins} minutes of free trial. ⏱️`, 'info');
+    startGuestTrialMonitor();
+  }
+
+  window.startGuestTrialMonitor = function() {
+    if (guestTimerInterval) clearInterval(guestTimerInterval);
+    guestTimerInterval = setInterval(() => {
+      const guestStart = localStorage.getItem('pomo-guest-start');
+      if (!guestStart) { clearInterval(guestTimerInterval); guestTimerInterval = null; window.hideGuestTimer(); return; }
+      const elapsed = Date.now() - parseInt(guestStart);
+      updateGuestTimer();
+      if (elapsed >= TRIAL_DURATION) {
+        clearInterval(guestTimerInterval); guestTimerInterval = null;
+        trialExpired();
+      }
+    }, 1000);
+  };
+
+  function trialExpired() {
+    localStorage.removeItem('pomo-guest-start');
+    localStorage.removeItem('pomo-user');
+
+    window.hideGuestTimer();
+
+    const btnLogin = $('#btn-login');
+    if (btnLogin) btnLogin.classList.remove('hidden');
+    const drLoginSpan = $('#dr-login span');
+    if (drLoginSpan) drLoginSpan.textContent = 'Log In';
+    const headerUsername = $('.header-username');
+    if (headerUsername) headerUsername.textContent = 'User';
+    const headerAvatar = $('.header-avatar-v2');
+    if (headerAvatar) headerAvatar.innerHTML = '<span class="avatar-emoji">👤</span>';
+
+    if (typeof config !== 'undefined') {
+      config.user = { ...DEFAULTS.user };
+      saveConfig();
+    }
+
+    showToast('Your free trial has ended! Please sign in to continue using Pomo. ⏰', 'warning');
+
+    window._trialExpired = true;
+    const closeBtn = $('#close-auth');
+    const skipBtn = $('.auth-guest-btn');
+    const guestLink = $('.form-guest-link');
+    if (closeBtn) closeBtn.style.display = 'none';
+    if (skipBtn) skipBtn.style.display = 'none';
+    if (guestLink) guestLink.style.display = 'none';
+
+    resetEmailForm();
+    if (authOverlay) {
+      authOverlay.classList.remove('hidden');
+      authOverlay.style.display = '';
+      authOverlay.style.visibility = '';
+      authOverlay.style.opacity = '';
+    }
+  }
+
+  // Close triggers
+  const btnCloseAuth = $('#close-auth');
+  if (btnCloseAuth) btnCloseAuth.addEventListener('click', closeAuthModal);
+
+  const guestBtn = $('.auth-guest-btn');
+  if (guestBtn) guestBtn.addEventListener('click', (e) => { e.preventDefault(); startGuestSession(); });
+
+  const formGuestLink = $('.form-guest-link');
+  if (formGuestLink) formGuestLink.addEventListener('click', (e) => { e.preventDefault(); startGuestSession(); });
+
+  // User Profile Dropdown
+  const btnProfile = $('#header-user-btn');
+  const userDropdown = $('#user-dropdown');
+  console.log('User profile button found:', btnProfile);
+  console.log('User dropdown found:', userDropdown);
+  
+  if (btnProfile && userDropdown) {
+    console.log('Adding click handler to user profile button');
+    btnProfile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('User profile button clicked');
+      const isVisible = !userDropdown.classList.contains('hidden');
+      console.log('Dropdown currently visible:', isVisible);
+      if (isVisible) {
+        userDropdown.classList.add('hidden');
+        btnProfile.classList.remove('header-user-btn-active');
+        console.log('Hiding dropdown');
+      } else {
+        userDropdown.classList.remove('hidden');
+        btnProfile.classList.add('header-user-btn-active');
+        console.log('Showing dropdown');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!btnProfile.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.classList.add('hidden');
+        btnProfile.classList.remove('header-user-btn-active');
+      }
+    });
+  } else {
+    console.error('User profile dropdown not working:');
+    console.error('- btnProfile found:', !!btnProfile);
+    console.error('- userDropdown found:', !!userDropdown);
+  }
+}
+
 // --- Init ---
 function init() {
   loadConfig();
   loadTasks();
   applyTranslation(config.language || 'en');
+
+  // Check for successful OAuth login (returning from callback)
+  const googleOAuthSuccess = localStorage.getItem('google-oauth-success');
+  if (googleOAuthSuccess) {
+    try {
+      const userData = JSON.parse(googleOAuthSuccess);
+      console.log('Google OAuth login successful:', userData);
+      
+      // Update UI with user info
+      const headerUsername = $('.header-username');
+      if (headerUsername) headerUsername.textContent = userData.name;
+      
+      const headerAvatar = $('.header-avatar-v2');
+      if (headerAvatar) {
+        if (userData.picture) {
+          headerAvatar.innerHTML = '<img src="' + userData.picture + '" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+        } else {
+          headerAvatar.innerHTML = '<span class="avatar-emoji">' + (userData.avatar || '👤') + '</span>';
+        }
+      }
+      
+      // Update UI state to "Logged In"
+      const btnLogin = $('#btn-login');
+      if (btnLogin) btnLogin.classList.add('hidden');
+      
+      const drLoginSpan = $('#dr-login span');
+      if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+      
+      // Sync to main config so Profile Modal is updated
+      if (typeof config !== 'undefined') {
+        config.user = {
+          ...config.user,
+          username: userData.name,
+          email: userData.email || '',
+          bio: ''
+        };
+        saveConfig();
+      }
+      
+      // Reset trial flag and restore buttons
+      window._trialExpired = false;
+      if (typeof window.restoreAuthButtons === 'function') window.restoreAuthButtons();
+      
+      // Show success message
+      setTimeout(() => {
+        showToast(`Welcome back, ${userData.name}! 🎉`);
+      }, 500);
+      
+      // Clean up the success flag
+      localStorage.removeItem('google-oauth-success');
+    } catch (e) {
+      console.error('Error processing OAuth success:', e);
+    }
+  }
 
   // Sync user info
   const hn = $('.header-username');
@@ -4458,6 +5254,19 @@ function init() {
   }
 
   switchMode('pomodoro');
+
+  // Restore saved theme
+  const savedTheme = localStorage.getItem('pomo-theme');
+  if (savedTheme && savedTheme !== 'default') {
+    const themeClass = 'theme-' + savedTheme;
+    if (document.body) document.body.classList.add(themeClass);
+    const themeCard = document.querySelector('.theme-card[data-theme="' + savedTheme + '"]');
+    if (themeCard) {
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+      themeCard.classList.add('active');
+    }
+  }
+
   // Ensure stats exist in storage
   if (!localStorage.getItem('pomo-stats')) {
     saveStats({});
@@ -4468,6 +5277,42 @@ function init() {
   renderTasks();
   initSidebar();
   bindEvents();
+  initAuthAndDropdowns(); // Initialize auth modal and user dropdown
+
+  // Check for existing guest session on page load
+  const storedUser = localStorage.getItem('pomo-user');
+  const guestStart = localStorage.getItem('pomo-guest-start');
+  if (storedUser && guestStart) {
+    const user = JSON.parse(storedUser);
+    if (user.guest) {
+      const elapsed = Date.now() - parseInt(guestStart);
+      if (elapsed >= 5 * 60 * 1000) {
+        localStorage.removeItem('pomo-guest-start');
+        localStorage.removeItem('pomo-user');
+      } else {
+        const headerUsername = $('.header-username');
+        if (headerUsername) headerUsername.textContent = 'Guest';
+        const loginBtn = $('#btn-login');
+        if (loginBtn) loginBtn.classList.add('hidden');
+        const drLoginSpan = $('#dr-login span');
+        if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+        if (typeof window.showGuestTimer === 'function') window.showGuestTimer();
+        if (typeof window.startGuestTrialMonitor === 'function') window.startGuestTrialMonitor();
+      }
+    }
+  } else if (storedUser && !guestStart) {
+    // Non-guest logged-in user (OAuth or regular login)
+    const user = JSON.parse(storedUser);
+    if (user && !user.guest) {
+      const btnLogin = $('#btn-login');
+      if (btnLogin && !btnLogin.classList.contains('hidden')) {
+        btnLogin.classList.add('hidden');
+      }
+      const drLoginSpan = $('#dr-login span');
+      if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+    }
+  }
+
   initMascotEyes();
   initSelfTests();
   initTherapist();

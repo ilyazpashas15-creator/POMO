@@ -38,17 +38,19 @@
 
 ## Step 2: Add Client ID to Your App
 
-1. **Open** `index.html`
+1. **Open** `.env.local` (in the project root)
 
-2. **Find this line** (around line 4417):
-   ```html
-   data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE"
+2. **Find this line**:
+   ```
+   VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID_HERE
    ```
 
 3. **Replace** `YOUR_GOOGLE_CLIENT_ID_HERE` with your actual Client ID:
-   ```html
-   data-client_id="123456789-abcdefghijklmnop.apps.googleusercontent.com"
    ```
+   VITE_GOOGLE_CLIENT_ID=123456789-abcdefghijklmnop.apps.googleusercontent.com
+   ```
+
+   > **Note:** Vite automatically replaces `%VITE_GOOGLE_CLIENT_ID%` in `index.html` with the value from `.env.local` at dev/build time.
 
 ## Step 3: Test It!
 
