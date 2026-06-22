@@ -1288,9 +1288,35 @@ function initSidebar() {
 
   if (toggle) {
     toggle.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
+      if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('open');
+      } else {
+        sidebar.classList.toggle('collapsed');
+      }
     });
   }
+
+  // Close sidebar when clicking outside or clicking a menu item on mobile
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+      const isClickInside = sidebar.contains(e.target);
+      const isClickToggle = toggle && toggle.contains(e.target);
+      if (!isClickInside && !isClickToggle && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+      }
+    }
+  });
+
+  // Close sidebar when a navigation item is clicked on mobile
+  sidebar.querySelectorAll('.sidebar-item, .sidebar-sub-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      // Don't close if it's an expandable group header (unless it's already active)
+      if (item.classList.contains('sidebar-expandable')) return;
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+      }
+    });
+  });
 
   // Expandable groups
   const chatToggle = $('#chat-toggle');

@@ -6549,16 +6549,37 @@ input:checked+.toggle-track:before {
     margin-left: 0 !important;
   }
 
-  .sidebar-toggle {
-    right: -40px;
+  #sidebar-toggle {
+    position: absolute !important;
+    right: -42px;
+    top: 14px;
+    z-index: 100;
+    background: var(--bg-sidebar) !important;
+    border: 1px solid var(--surface-border) !important;
+    border-left: none !important;
+    border-radius: 0 8px 8px 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar:not(.open) #sidebar-toggle svg {
+    transform: rotate(180deg);
   }
 
   .header-user {
-    display: none;
+    display: flex !important;
   }
 
-  .mood-meter {
-    display: none;
+  #lang-selector-btn,
+  #mode-selector-btn,
+  .mood-meter,
+  #btn-report,
+  .header-divider {
+    display: none !important;
   }
 
   #timer-time {
