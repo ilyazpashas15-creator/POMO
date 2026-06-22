@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 const env = loadEnv('development', process.cwd(), '');
 
 export default defineConfig({
+  base: '/',
   server: {
     port: 5174,
   },
