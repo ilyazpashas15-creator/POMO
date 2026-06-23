@@ -1282,27 +1282,49 @@ function startNewChat(isDuo = false) {
 }
 
 // --- Sidebar ---
+function updateSidebarBackdrop() {
+  const backdrop = $('#sidebar-backdrop');
+  const sidebar = $('#sidebar');
+  if (backdrop && sidebar) {
+    backdrop.classList.toggle('visible', sidebar.classList.contains('open'));
+  }
+}
+
 function initSidebar() {
   const sidebar = $('#sidebar');
   const toggle = $('#sidebar-toggle');
+  const backdrop = $('#sidebar-backdrop');
 
   if (toggle) {
     toggle.addEventListener('click', () => {
       if (window.innerWidth <= 768) {
         sidebar.classList.toggle('open');
+        updateSidebarBackdrop();
       } else {
         sidebar.classList.toggle('collapsed');
       }
     });
   }
 
-  // Close sidebar when clicking outside or clicking a menu item on mobile
+  // Close sidebar when clicking the backdrop
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+        updateSidebarBackdrop();
+      }
+    });
+  }
+
+  // Close sidebar when clicking outside on mobile
   document.addEventListener('click', (e) => {
     if (window.innerWidth <= 768) {
       const isClickInside = sidebar.contains(e.target);
       const isClickToggle = toggle && toggle.contains(e.target);
-      if (!isClickInside && !isClickToggle && sidebar.classList.contains('open')) {
+      const isClickBackdrop = backdrop && backdrop.contains(e.target);
+      if (!isClickInside && !isClickToggle && !isClickBackdrop && sidebar.classList.contains('open')) {
         sidebar.classList.remove('open');
+        updateSidebarBackdrop();
       }
     }
   });
@@ -1314,6 +1336,7 @@ function initSidebar() {
       if (item.classList.contains('sidebar-expandable')) return;
       if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
+        updateSidebarBackdrop();
       }
     });
   });

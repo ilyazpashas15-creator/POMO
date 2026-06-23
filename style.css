@@ -6539,27 +6539,71 @@ input:checked+.toggle-track:before {
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(calc(-1 * var(--sidebar-width)));
+    overflow: visible !important;
   }
 
   .sidebar.open {
     transform: translateX(0);
   }
 
+  /* Backdrop overlay when sidebar is open */
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 59;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+
+  .sidebar-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   #main-wrapper {
     margin-left: 0 !important;
   }
 
+  #main-content {
+    padding: 0 16px;
+    padding-bottom: 40px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .mascot-area,
+  .hero-message,
+  #timer-display,
+  .timer-controls,
+  #mode-tabs,
+  .timer-chat-area {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-message {
+    text-align: center;
+  }
+
   #sidebar-toggle {
     position: absolute !important;
-    right: -42px;
+    right: -46px;
     top: 14px;
-    z-index: 100;
+    z-index: 101;
     background: var(--bg-sidebar) !important;
     border: 1px solid var(--surface-border) !important;
     border-left: none !important;
     border-radius: 0 8px 8px 0 !important;
-    width: 40px !important;
-    height: 40px !important;
+    width: 44px !important;
+    height: 44px !important;
     box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
     display: flex !important;
     align-items: center;
