@@ -6750,23 +6750,23 @@ input:checked+.toggle-track:before {
   }
 
   .header-user {
-    padding: 3px 8px 3px 4px;
-    gap: 4px;
+    padding: 2px 6px 2px 3px;
+    gap: 3px;
   }
 
   .header-avatar-v2 {
-    width: 24px;
-    height: 24px;
-    font-size: 0.8rem;
+    width: 22px;
+    height: 22px;
+    font-size: 0.7rem;
   }
 
   .header-username {
-    font-size: 0.72rem;
+    display: none;
   }
 
   .chevron-user {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
   }
 
   #sidebar-toggle {
