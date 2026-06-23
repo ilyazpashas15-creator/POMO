@@ -6662,20 +6662,16 @@ input:checked+.toggle-track:before {
     height: 14px;
   }
 
-  /* Compact mood-meter: tiny avatar + percentage pill */
+  /* Compact mood-meter: just percentage pill */
   .mood-meter {
-    padding: 0 2px;
+    padding: 0 3px;
     gap: 0;
-    border-radius: 8px;
-    height: 18px;
+    border-radius: 6px;
+    height: 16px;
   }
 
   .mood-avatar-container {
-    margin: 0;
-  }
-
-  .mood-avatar {
-    font-size: 0.42rem;
+    display: none !important;
   }
 
   .mood-pulse {
@@ -6685,11 +6681,11 @@ input:checked+.toggle-track:before {
   .mood-info {
     flex-direction: row;
     align-items: center;
-    gap: 1px;
+    gap: 0;
   }
 
   .mood-label-row {
-    gap: 1px;
+    gap: 0;
   }
 
   .mood-info .mood-label-row .mood-label {
@@ -6702,8 +6698,9 @@ input:checked+.toggle-track:before {
 
   .mood-percent-tag {
     font-size: 0.38rem;
-    padding: 0 1px;
-    line-height: 1;
+    padding: 0 2px;
+    line-height: 1.2;
+    border-radius: 3px;
   }
 
   .header-icon-btn {
