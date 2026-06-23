@@ -6606,8 +6606,7 @@ input:checked+.toggle-track:before {
     justify-content: center;
   }
 
-  /* Hide redundant header controls on mobile */
-  #mode-selector-btn,
+  /* Hide language selector on mobile, keep mode selector visible */
   #lang-selector-btn {
     display: none !important;
   }
@@ -6616,9 +6615,32 @@ input:checked+.toggle-track:before {
     gap: 2px;
   }
 
-  /* Make mood-meter compact on mobile, hide label */
+  /* Make mood-meter compact on mobile, hide label and bar */
   .mood-meter {
-    padding: 4px 6px;
+    padding: 2px 4px;
+    gap: 3px;
+  }
+
+  .mood-avatar-container {
+    margin: 0;
+  }
+
+  .mood-avatar {
+    font-size: 0.75rem;
+  }
+
+  .mood-pulse {
+    display: none;
+  }
+
+  .mood-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .mood-label-row {
+    gap: 2px;
   }
 
   .mood-info .mood-label-row .mood-label {
@@ -6626,16 +6648,12 @@ input:checked+.toggle-track:before {
   }
 
   .mood-bar {
-    width: 40px;
-    height: 4px;
+    display: none;
   }
 
   .mood-percent-tag {
-    font-size: 0.65rem;
-  }
-
-  .mood-avatar {
-    font-size: 0.85rem;
+    font-size: 0.6rem;
+    padding: 0 3px;
   }
 
   .header-signup-btn {
@@ -6822,7 +6840,6 @@ input:checked+.toggle-track:before {
     font-size: 3rem;
   }
 
-  #mode-selector-btn,
   #lang-selector-btn {
     display: none !important;
   }
