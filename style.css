@@ -6582,7 +6582,10 @@ input:checked+.toggle-track:before {
   #timer-display,
   .timer-controls,
   #mode-tabs,
-  .timer-chat-area {
+  .timer-chat-area,
+  #btn-start,
+  #chat-messages,
+  .chat-input-area {
     width: 100%;
     max-width: 400px;
     margin-left: auto;
@@ -6591,6 +6594,53 @@ input:checked+.toggle-track:before {
 
   .hero-message {
     text-align: center;
+  }
+
+  #timer-display {
+    justify-content: center;
+  }
+
+  #btn-start {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide redundant header controls on mobile */
+  #mode-selector-btn,
+  #lang-selector-btn {
+    display: none !important;
+  }
+
+  .header-controls-group {
+    gap: 2px;
+  }
+
+  /* Make mood-meter compact on mobile, hide label */
+  .mood-meter {
+    padding: 4px 6px;
+  }
+
+  .mood-info .mood-label-row .mood-label {
+    display: none;
+  }
+
+  .mood-bar {
+    width: 40px;
+    height: 4px;
+  }
+
+  .mood-percent-tag {
+    font-size: 0.65rem;
+  }
+
+  .mood-avatar {
+    font-size: 0.85rem;
+  }
+
+  .header-signup-btn {
+    padding: 6px 14px;
+    font-size: 0.78rem;
   }
 
   #sidebar-toggle {
@@ -6618,34 +6668,6 @@ input:checked+.toggle-track:before {
     display: flex !important;
   }
 
-  /* Make header controls more compact on mobile */
-  .control-btn {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-    gap: 4px;
-  }
-
-  .control-btn svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .mood-meter {
-    padding: 4px 8px;
-  }
-
-  .mood-bar {
-    width: 50px;
-  }
-
-  .mood-label {
-    font-size: 0.55rem;
-  }
-
-  .mood-avatar {
-    font-size: 0.85rem;
-  }
-
   .header-divider {
     margin: 0 6px;
   }
@@ -6653,7 +6675,6 @@ input:checked+.toggle-track:before {
   #timer-time {
     font-size: 4rem;
   }
-
 
   .hero-message h1 {
     font-size: 1.3rem;
@@ -6724,12 +6745,12 @@ input:checked+.toggle-track:before {
 @media (max-width: 520px) {
   .header-inner {
     padding: 0 8px;
-    gap: 6px;
+    gap: 4px;
   }
 
   /* Even more compact on very small screens */
   .control-btn {
-    padding: 4px 8px;
+    padding: 4px 6px;
     font-size: 0.7rem;
     gap: 3px;
   }
@@ -6751,8 +6772,12 @@ input:checked+.toggle-track:before {
     display: none;
   }
 
+  .header-controls-group {
+    gap: 2px;
+  }
+
   #main-content {
-    padding: 0 16px;
+    padding: 0 12px;
     padding-bottom: 40px;
     margin: 0 auto;
     display: flex;
@@ -6767,9 +6792,12 @@ input:checked+.toggle-track:before {
   #timer-display,
   .timer-controls,
   #mode-tabs,
-  .timer-chat-area {
+  .timer-chat-area,
+  #btn-start,
+  #chat-messages,
+  .chat-input-area {
     width: 100%;
-    max-width: 400px;
+    max-width: 360px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -6784,22 +6812,24 @@ input:checked+.toggle-track:before {
     justify-content: center;
   }
 
-  /* Center start button */
-  .timer-controls {
-    display: flex;
-    flex-direction: column;
+  #btn-start {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
   }
 
   #timer-time {
     font-size: 3rem;
   }
 
+  #mode-selector-btn,
+  #lang-selector-btn {
+    display: none !important;
+  }
 
   .header-signup-btn {
-    padding: 6px 14px;
-    font-size: 0.78rem;
+    padding: 5px 10px;
+    font-size: 0.72rem;
   }
 }
 
