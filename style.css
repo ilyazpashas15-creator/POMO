@@ -377,6 +377,10 @@ body::after {
   transition: all var(--transition);
 }
 
+#sidebar-toggle {
+  display: none;
+}
+
 .sidebar-toggle-inner:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
@@ -6749,6 +6753,10 @@ input:checked+.toggle-track:before {
   .chevron-user {
     width: 10px;
     height: 10px;
+  }
+
+  .sidebar-toggle-desktop {
+    display: none;
   }
 
   #sidebar-toggle {

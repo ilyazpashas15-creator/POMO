@@ -1298,17 +1298,23 @@ function updateSidebarBackdrop() {
 function initSidebar() {
   const sidebar = $('#sidebar');
   const toggle = $('#sidebar-toggle');
+  const toggleDesktop = $('#sidebar-toggle-desktop');
   const backdrop = $('#sidebar-backdrop');
 
+  function toggleSidebar() {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.toggle('open');
+      updateSidebarBackdrop();
+    } else {
+      sidebar.classList.toggle('collapsed');
+    }
+  }
+
   if (toggle) {
-    toggle.addEventListener('click', () => {
-      if (window.innerWidth <= 768) {
-        sidebar.classList.toggle('open');
-        updateSidebarBackdrop();
-      } else {
-        sidebar.classList.toggle('collapsed');
-      }
-    });
+    toggle.addEventListener('click', toggleSidebar);
+  }
+  if (toggleDesktop) {
+    toggleDesktop.addEventListener('click', toggleSidebar);
   }
 
   // Close sidebar when clicking the backdrop
