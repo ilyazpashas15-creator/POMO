@@ -6707,9 +6707,29 @@ input:checked+.toggle-track:before {
   }
 
   .header-signup-btn {
-    padding: 5px 10px;
-    font-size: 0.72rem;
+    padding: 4px 8px;
+    font-size: 0.68rem;
     white-space: nowrap;
+  }
+
+  .header-user {
+    padding: 3px 8px 3px 4px;
+    gap: 4px;
+  }
+
+  .header-avatar-v2 {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+
+  .header-username {
+    font-size: 0.72rem;
+  }
+
+  .chevron-user {
+    width: 12px;
+    height: 12px;
   }
 
   #sidebar-toggle {
@@ -6919,8 +6939,28 @@ input:checked+.toggle-track:before {
   }
 
   .header-signup-btn {
-    padding: 5px 10px;
-    font-size: 0.72rem;
+    padding: 3px 7px;
+    font-size: 0.65rem;
+  }
+
+  .header-user {
+    padding: 2px 6px 2px 3px;
+    gap: 3px;
+  }
+
+  .header-avatar-v2 {
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+  }
+
+  .header-username {
+    display: none;
+  }
+
+  .chevron-user {
+    width: 10px;
+    height: 10px;
   }
 }
 
