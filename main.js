@@ -1285,8 +1285,13 @@ function startNewChat(isDuo = false) {
 function updateSidebarBackdrop() {
   const backdrop = $('#sidebar-backdrop');
   const sidebar = $('#sidebar');
-  if (backdrop && sidebar) {
-    backdrop.classList.toggle('visible', sidebar.classList.contains('open'));
+  const toggle = $('#sidebar-toggle');
+  const isOpen = sidebar && sidebar.classList.contains('open');
+  if (backdrop) {
+    backdrop.classList.toggle('visible', isOpen);
+  }
+  if (toggle) {
+    toggle.classList.toggle('open', isOpen);
   }
 }
 
