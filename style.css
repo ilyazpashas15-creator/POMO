@@ -6666,8 +6666,8 @@ input:checked+.toggle-track:before {
   .mood-meter {
     padding: 0 2px;
     gap: 0;
-    border-radius: 10px;
-    height: 20px;
+    border-radius: 8px;
+    height: 18px;
   }
 
   .mood-avatar-container {
@@ -6675,7 +6675,7 @@ input:checked+.toggle-track:before {
   }
 
   .mood-avatar {
-    font-size: 0.48rem;
+    font-size: 0.42rem;
   }
 
   .mood-pulse {
@@ -6701,9 +6701,20 @@ input:checked+.toggle-track:before {
   }
 
   .mood-percent-tag {
-    font-size: 0.4rem;
+    font-size: 0.38rem;
     padding: 0 1px;
     line-height: 1;
+  }
+
+  .header-icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  .header-icon-btn svg {
+    width: 14px;
+    height: 14px;
   }
 
   .header-divider {
@@ -6891,6 +6902,17 @@ input:checked+.toggle-track:before {
 
   .mood-meter {
     display: none;
+  }
+
+  .header-icon-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+
+  .header-icon-btn svg {
+    width: 12px;
+    height: 12px;
   }
 
   .header-divider {
