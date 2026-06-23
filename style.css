@@ -6718,6 +6718,27 @@ input:checked+.toggle-track:before {
     height: 14px;
   }
 
+  .chat-input-area {
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  .chat-input-left {
+    padding: 8px 14px;
+    border-radius: 14px;
+    gap: 8px;
+  }
+
+  .chat-input-v2 {
+    font-size: 0.85rem;
+    padding: 8px 0;
+  }
+
+  .chat-attach-btn,
+  .chat-mic-btn-v2 {
+    padding: 4px;
+  }
+
   .header-divider {
     margin: 0 4px;
   }
@@ -6914,6 +6935,22 @@ input:checked+.toggle-track:before {
   .header-icon-btn svg {
     width: 12px;
     height: 12px;
+  }
+
+  .chat-input-left {
+    padding: 6px 10px;
+    border-radius: 12px;
+    gap: 6px;
+  }
+
+  .chat-input-v2 {
+    font-size: 0.78rem;
+    padding: 6px 0;
+  }
+
+  .chat-attach-btn,
+  .chat-mic-btn-v2 {
+    padding: 3px;
   }
 
   .header-divider {
