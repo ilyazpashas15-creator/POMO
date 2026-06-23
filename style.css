@@ -6708,8 +6708,44 @@ input:checked+.toggle-track:before {
   }
 
   #main-content {
-    padding: 0 12px;
+    padding: 0 16px;
     padding-bottom: 40px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* Center all main content children */
+  .mascot-area,
+  .hero-message,
+  #timer-display,
+  .timer-controls,
+  #mode-tabs,
+  .timer-chat-area {
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Center text content */
+  .hero-message {
+    text-align: center;
+  }
+
+  /* Center timer */
+  #timer-display {
+    justify-content: center;
+  }
+
+  /* Center start button */
+  .timer-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
   }
 
   #timer-time {
