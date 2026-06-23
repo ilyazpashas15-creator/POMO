@@ -6641,6 +6641,7 @@ input:checked+.toggle-track:before {
 
   .header-right-top {
     gap: 3px;
+    flex-wrap: wrap;
   }
 
   .header-controls-group {
@@ -6904,6 +6905,7 @@ input:checked+.toggle-track:before {
 
   .header-right-top {
     gap: 2px;
+    flex-wrap: wrap;
   }
 
   /* Even more compact on very small screens */
