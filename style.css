@@ -6606,18 +6606,64 @@ input:checked+.toggle-track:before {
     justify-content: center;
   }
 
-  /* Hide language selector on mobile, keep mode selector visible */
+  /* ===== HEADER FIXES FOR MOBILE ===== */
+
+  /* Compact header bar */
+  .header-inner {
+    padding: 0 12px;
+    gap: 8px;
+    height: 56px;
+  }
+
+  /* Smaller logo */
+  .logo-container-v6 {
+    gap: 6px;
+  }
+
+  .glass-icon-3d {
+    width: 30px;
+    height: 30px;
+  }
+
+  .pomo-h1 {
+    font-size: 1.1rem;
+  }
+
+  .ai-nano {
+    display: none !important;
+  }
+
+  /* Hide language selector */
   #lang-selector-btn {
     display: none !important;
+  }
+
+  .header-right-top {
+    gap: 3px;
   }
 
   .header-controls-group {
     gap: 2px;
   }
 
-  /* Make mood-meter compact on mobile, hide label and bar */
+  /* Uniform icon-only control buttons */
+  .control-btn span {
+    display: none;
+  }
+
+  .control-btn {
+    padding: 6px 8px;
+    gap: 0;
+  }
+
+  .control-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Compact mood-meter: avatar + percentage pill */
   .mood-meter {
-    padding: 2px 4px;
+    padding: 2px 5px;
     gap: 3px;
   }
 
@@ -6656,9 +6702,14 @@ input:checked+.toggle-track:before {
     padding: 0 3px;
   }
 
+  .header-divider {
+    margin: 0 4px;
+  }
+
   .header-signup-btn {
-    padding: 6px 14px;
-    font-size: 0.78rem;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+    white-space: nowrap;
   }
 
   #sidebar-toggle {
@@ -6762,15 +6813,38 @@ input:checked+.toggle-track:before {
 
 @media (max-width: 520px) {
   .header-inner {
-    padding: 0 8px;
+    padding: 0 6px;
+    gap: 3px;
+    height: 52px;
+  }
+
+  /* Smaller logo */
+  .logo-container-v6 {
     gap: 4px;
+  }
+
+  .glass-icon-3d {
+    width: 26px;
+    height: 26px;
+  }
+
+  .pomo-h1 {
+    font-size: 0.95rem;
+  }
+
+  .ai-nano {
+    display: none !important;
+  }
+
+  .header-right-top {
+    gap: 2px;
   }
 
   /* Even more compact on very small screens */
   .control-btn {
-    padding: 4px 6px;
-    font-size: 0.7rem;
-    gap: 3px;
+    padding: 4px 5px;
+    font-size: 0.65rem;
+    gap: 0;
   }
 
   .control-btn svg {
@@ -6779,11 +6853,11 @@ input:checked+.toggle-track:before {
   }
 
   .control-btn span {
-    display: none; /* Hide text, show only icons */
+    display: none;
   }
 
   .mood-meter {
-    display: none; /* Hide focus meter on very small screens */
+    display: none;
   }
 
   .header-divider {
@@ -6791,7 +6865,7 @@ input:checked+.toggle-track:before {
   }
 
   .header-controls-group {
-    gap: 2px;
+    gap: 1px;
   }
 
   #main-content {
