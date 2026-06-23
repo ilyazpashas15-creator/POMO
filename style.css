@@ -6675,7 +6675,8 @@ input:checked+.toggle-track:before {
   }
 
   .mood-avatar {
-    font-size: 0.48rem;
+    font-size: 0.7rem;
+    filter: none;
   }
 
   .mood-pulse {
