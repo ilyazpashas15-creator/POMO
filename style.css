@@ -6630,7 +6630,8 @@ input:checked+.toggle-track:before {
   }
 
   .ai-nano {
-    display: none !important;
+    font-size: 0.5rem;
+    padding: 1px 4px;
   }
 
   /* Hide language selector */
@@ -6864,7 +6865,8 @@ input:checked+.toggle-track:before {
   }
 
   .ai-nano {
-    display: none !important;
+    font-size: 0.45rem;
+    padding: 1px 3px;
   }
 
   .header-right-top {
