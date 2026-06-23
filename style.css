@@ -6662,12 +6662,13 @@ input:checked+.toggle-track:before {
     height: 14px;
   }
 
-  /* Compact mood-meter: brain + percentage */
+  /* Compact mood-meter: brain only */
   .mood-meter {
     padding: 0 2px;
     gap: 0;
     border-radius: 4px;
-    height: 14px;
+    height: 12px;
+    min-width: 0;
   }
 
   .mood-avatar-container {
@@ -6675,8 +6676,9 @@ input:checked+.toggle-track:before {
   }
 
   .mood-avatar {
-    font-size: 0.5rem;
+    font-size: 0.55rem;
     filter: none;
+    line-height: 1;
   }
 
   .mood-pulse {
@@ -6684,27 +6686,7 @@ input:checked+.toggle-track:before {
   }
 
   .mood-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 0;
-  }
-
-  .mood-label-row {
-    gap: 0;
-  }
-
-  .mood-info .mood-label-row .mood-label {
-    display: none;
-  }
-
-  .mood-bar {
-    display: none;
-  }
-
-  .mood-percent-tag {
-    font-size: 0.35rem;
-    padding: 0 1px;
-    line-height: 1;
+    display: none !important;
   }
 
   .header-icon-btn {
