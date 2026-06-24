@@ -4,6 +4,10 @@
 import { injectSpeedInsights } from '@vercel/speed-insights';
 injectSpeedInsights();
 
+// --- Vercel Analytics ---
+import { inject as injectAnalytics } from '@vercel/analytics';
+injectAnalytics();
+
 // --- Default Config ---
 const DEFAULTS = {
   pomodoro: 25,
