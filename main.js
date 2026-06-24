@@ -1504,7 +1504,7 @@ function initSidebar() {
       
       // Use direct Google OAuth URL with implicit flow (returns id_token in URL fragment)
       const googleClientId = '924419504630-4o5f3o2f1mo5m8q5uhjr34fceoa9f5k6.apps.googleusercontent.com';
-      const googleRedirectUri = 'http://localhost:5174/auth/google/callback';
+      const googleRedirectUri = window.location.origin + '/auth/google/callback';
       const googleScope = 'openid email profile';
       const googleState = Math.random().toString(36).substring(2, 15);
       const googleNonce = Math.random().toString(36).substring(2, 15);
@@ -1714,7 +1714,7 @@ function initSidebar() {
       
       // Check if GitHub OAuth is configured
       const clientId = document.querySelector('#github_oauth_config')?.getAttribute('data-github-client-id');
-      const redirectUri = document.querySelector('#github_oauth_config')?.getAttribute('data-redirect-uri');
+      const redirectUri = window.location.origin + (document.querySelector('#github_oauth_config')?.getAttribute('data-redirect-uri') || '/auth-callback.html');
       
       const isGithubPlaceholder = !clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE' || clientId.startsWith('%VITE_') || clientId.startsWith('YOUR_');
       if (clientId && !isGithubPlaceholder) {
