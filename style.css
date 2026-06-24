@@ -6807,6 +6807,15 @@ input:checked+.toggle-track:before {
   #mode-tabs {
     flex-direction: column;
     border-radius: var(--radius-md);
+    width: 100%;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .mode-tab {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
   }
 
   .mode-tab.active {
