@@ -6808,9 +6808,9 @@ input:checked+.toggle-track:before {
     flex-direction: row;
     border-radius: var(--radius-full);
     width: 100%;
-    max-width: 400px;
-    gap: 6px;
-    padding: 6px;
+    max-width: 420px;
+    gap: 4px;
+    padding: 5px;
     flex-wrap: nowrap;
     justify-content: space-between;
   }
@@ -6818,16 +6818,16 @@ input:checked+.toggle-track:before {
   .mode-tab {
     flex: 1;
     min-width: 0;
-    padding: 10px 12px;
-    font-size: 0.75rem;
+    padding: 8px 10px;
+    font-size: 0.7rem;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    gap: 4px;
   }
 
   .mode-tab svg {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
   }
 
