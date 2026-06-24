@@ -1531,9 +1531,20 @@ function initSidebar() {
               showToast('Google sign-in failed. Please try again.', 'error');
               return;
             }
-            if (typeof window.handleGoogleSignIn === 'function') {
-              window.handleGoogleSignIn(response);
-            }
+            // Fetch user info from Google using the access token
+            fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: 'Bearer ' + response.access_token }
+            })
+            .then(res => res.json())
+            .then(userInfo => {
+              if (typeof handleGoogleUser === 'function') {
+                handleGoogleUser(userInfo);
+              }
+            })
+            .catch(err => {
+              console.error('Failed to fetch Google user info:', err);
+              showToast('Google sign-in failed. Please try again.', 'error');
+            });
           }
         });
         tokenClient.requestAccessToken();
@@ -1863,19 +1874,12 @@ function initSidebar() {
   };
 
   // Google Sign-In callback function (called when user signs in)
-  window.handleGoogleSignIn = function(response) {
-    console.log('Google Sign-In successful!', response);
-    
+  function handleGoogleUser(userInfo) {
     if (window.__clearGoogleTimeout) {
       window.__clearGoogleTimeout();
       window.__clearGoogleTimeout = null;
     }
     
-    // Decode the JWT token to get user info
-    const userInfo = parseJwt(response.credential);
-    console.log('User info:', userInfo);
-    
-    // Store user info
     localStorage.setItem('pomo-user', JSON.stringify({
       name: userInfo.name,
       email: userInfo.email,
@@ -1883,7 +1887,6 @@ function initSidebar() {
       sub: userInfo.sub
     }));
     
-    // Update UI with user info
     const headerUsername = $('.header-username');
     if (headerUsername) headerUsername.textContent = userInfo.name;
     
@@ -1896,19 +1899,23 @@ function initSidebar() {
       }
     }
     
-    // Close modal and show success
     closeAuthModal();
     showToast(`Welcome, ${userInfo.name}! 🎉`);
-
+    
     restoreAuthButtons();
     window._trialExpired = false;
-
-    // Update UI state to "Logged In"
+    
     const btnLogin = $('#btn-login');
     if (btnLogin) btnLogin.classList.add('hidden');
     
     const drLoginSpan = $('#dr-login span');
     if (drLoginSpan) drLoginSpan.textContent = 'Log Out';
+  }
+
+  window.handleGoogleSignIn = function(response) {
+    console.log('Google Sign-In successful!', response);
+    const userInfo = parseJwt(response.credential);
+    handleGoogleUser(userInfo);
   };
 
   // Helper function to decode JWT token
