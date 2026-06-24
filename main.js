@@ -1880,12 +1880,26 @@ function initSidebar() {
       window.__clearGoogleTimeout = null;
     }
     
-    localStorage.setItem('pomo-user', JSON.stringify({
+    const userData = {
       name: userInfo.name,
       email: userInfo.email,
       picture: userInfo.picture,
-      sub: userInfo.sub
-    }));
+      sub: userInfo.sub,
+      username: userInfo.name,
+      bio: ''
+    };
+    localStorage.setItem('pomo-user', JSON.stringify(userData));
+    
+    // Sync to config so profile modal shows the data
+    if (typeof config !== 'undefined') {
+      config.user = {
+        ...config.user,
+        username: userInfo.name,
+        email: userInfo.email,
+        bio: ''
+      };
+      saveConfig();
+    }
     
     const headerUsername = $('.header-username');
     if (headerUsername) headerUsername.textContent = userInfo.name;
