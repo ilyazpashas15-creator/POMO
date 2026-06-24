@@ -1502,22 +1502,8 @@ function initSidebar() {
       
       const originalText = authGoogleBtn.innerHTML;
       
-      // Use direct Google OAuth URL with implicit flow (returns id_token in URL fragment)
-      const googleClientId = '924419504630-4o5f3o2f1mo5m8q5uhjr34fceoa9f5k6.apps.googleusercontent.com';
-      const googleRedirectUri = window.location.origin + '/auth/google/callback';
-      const googleScope = 'openid email profile';
-      const googleState = Math.random().toString(36).substring(2, 15);
-      const googleNonce = Math.random().toString(36).substring(2, 15);
+      // Use Google Identity Services (GIS) token client (no redirect URI needed)
       
-      // Store state and nonce for validation
-      localStorage.setItem('google-oauth-state', googleState);
-      localStorage.setItem('google-oauth-nonce', googleNonce);
-      
-      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(googleRedirectUri)}&scope=${encodeURIComponent(googleScope)}&response_type=token%20id_token&state=${googleState}&nonce=${googleNonce}`;
-      
-      console.log('Opening Google OAuth URL:', googleAuthUrl);
-      
-      // Show loading state
       authGoogleBtn.innerHTML = `
         <div class="social-icon-wrapper">
           <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -1529,98 +1515,34 @@ function initSidebar() {
             </g>
           </svg>
         </div>
-        <span>Redirecting to Google...</span>
+        <span>Signing in with Google...</span>
       `;
       authGoogleBtn.disabled = true;
-      
-      // Open Google OAuth in a popup window
-      const popup = window.open(googleAuthUrl, 'google-oauth', 'width=500,height=600,scrollbars=yes,resizable=yes');
-      
-      // Check if popup was blocked
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        // Popup was blocked - open in same window instead
-        console.warn('Popup blocked, opening in same window');
-        authGoogleBtn.innerHTML = originalText;
-        authGoogleBtn.disabled = false;
-        window.location.href = googleAuthUrl;
-        return;
-      }
 
-      // Reset processed flag before opening popup
-      window.__googleAuthProcessed = false;
-      
-      // Monitor popup for closure
-      const checkClosed = setInterval(() => {
-        try {
-          if (popup.closed) {
-            clearInterval(checkClosed);
+      try {
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'openid email profile',
+          callback: (response) => {
             authGoogleBtn.innerHTML = originalText;
             authGoogleBtn.disabled = false;
-
-            // If already processed by postMessage listener, skip
-            if (window.__googleAuthProcessed) {
-              window.__googleAuthProcessed = false;
+            if (response.error) {
+              console.error('Google OAuth error:', response);
+              showToast('Google sign-in failed. Please try again.', 'error');
               return;
             }
-            
-            // Check if we received a success callback
-            const googleUser = localStorage.getItem('google-oauth-success');
-            if (googleUser) {
-              const userData = JSON.parse(googleUser);
-              localStorage.removeItem('google-oauth-success');
-              
-              // Store user info
-              localStorage.setItem('pomo-user', JSON.stringify(userData));
-              
-              // Update UI
-              const headerUsername = $('.header-username');
-              if (headerUsername) headerUsername.textContent = userData.name;
-              
-              const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
-              if (headerAvatar) headerAvatar.textContent = userData.avatar || '👤';
-              
-              // Close modal
-              closeAuthModal();
-              
-              // Show success
-              showToast(`Welcome, ${userData.name}! 🎉`);
-            } else {
-              // Popup was closed without success - fall back to demo mode
-              console.warn('Google OAuth popup closed without success, using demo mode');
-              
-              const demoUsers = [
-                { name: 'Alex Johnson', email: 'alex@example.com', avatar: '👨‍💻' },
-                { name: 'Sarah Chen', email: 'sarah@example.com', avatar: '👩‍🎨' },
-                { name: 'Mike Rodriguez', email: 'mike@example.com', avatar: '👨‍🚀' },
-                { name: 'Emma Wilson', email: 'emma@example.com', avatar: '👩‍🔬' }
-              ];
-              
-              const randomUser = demoUsers[Math.floor(Math.random() * demoUsers.length)];
-              
-              // Store user info
-              localStorage.setItem('pomo-user', JSON.stringify(randomUser));
-              
-              // Update UI
-              const headerUsername = $('.header-username');
-              if (headerUsername) headerUsername.textContent = randomUser.name;
-              
-              const headerAvatar = $('.header-avatar-v2 .avatar-emoji');
-              if (headerAvatar) headerAvatar.textContent = randomUser.avatar;
-              
-              // Close modal
-              closeAuthModal();
-              
-              // Show success with demo indicator
-              showToast(`Welcome, ${randomUser.name}! 🎉 (Demo Mode - Google OAuth needs backend setup)`);
+            if (typeof window.handleGoogleSignIn === 'function') {
+              window.handleGoogleSignIn(response);
             }
           }
-        } catch (e) {
-          // Error checking popup - might be closed
-          clearInterval(checkClosed);
-          authGoogleBtn.innerHTML = originalText;
-          authGoogleBtn.disabled = false;
-        }
-      }, 1000);
+        });
+        tokenClient.requestAccessToken();
+      } catch (err) {
+        console.error('Google GIS SDK error:', err);
+        authGoogleBtn.innerHTML = originalText;
+        authGoogleBtn.disabled = false;
+        showToast('Google sign-in unavailable. Try again later.', 'error');
+      }
     });
   } else {
     console.error('Google button not found!');
