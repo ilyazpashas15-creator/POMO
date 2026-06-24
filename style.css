@@ -6808,17 +6808,27 @@ input:checked+.toggle-track:before {
     flex-direction: row;
     border-radius: var(--radius-full);
     width: 100%;
-    gap: 4px;
-    padding: 4px;
+    max-width: 400px;
+    gap: 6px;
+    padding: 6px;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    justify-content: space-between;
   }
 
   .mode-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mode-tab svg {
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
-    padding: 10px 14px;
-    font-size: 0.8rem;
   }
 
   .mode-tab.active {
