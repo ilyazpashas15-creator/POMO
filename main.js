@@ -199,6 +199,23 @@ function loadConfig() {
   try {
     const s = JSON.parse(localStorage.getItem('pomo-config'));
     if (s) config = { ...DEFAULTS, ...s };
+    
+    // Load user data from pomo-user (set by OAuth login)
+    const userData = localStorage.getItem('pomo-user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        config.user = {
+          ...config.user,
+          username: user.name || user.username || config.user.username,
+          email: user.email || config.user.email,
+          bio: user.bio || config.user.bio || '',
+          avatar: user.picture || user.avatar || config.user.avatar
+        };
+      } catch (e) {
+        console.error('Error loading user data:', e);
+      }
+    }
   } catch { /* defaults */ }
 }
 
