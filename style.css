@@ -7805,20 +7805,14 @@ input:checked+.toggle-track:before {
 
 @media (max-width: 500px) {
   .pomo-steps-grid {
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 12px 0;
     margin: 0;
   }
 
   .pomo-step-card {
-    flex: 0 0 auto;
-    width: 120px;
-    min-height: 140px;
-    scroll-snap-align: start;
     padding: 14px 10px;
   }
 
