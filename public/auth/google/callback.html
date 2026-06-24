@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Sign-In - Pomo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 20px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.5rem;
+      color: #10b981;
+    }
+    p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+    .error {
+      color: #f87171;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h2>Signing you in...</h2>
+    <p id="status">Completing Google authentication</p>
+    <p class="error" id="error" style="display: none;"></p>
+  </div>
+
+  <script>
+    // Helper to decode JWT token (id_token is a JWT)
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        console.error('Error parsing JWT:', e);
+        return {};
+      }
+    }
+
+    // Parse URL fragment (implicit flow returns tokens in hash)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const idToken = hashParams.get('id_token');
+    const tokenState = hashParams.get('state');
+
+    // Parse URL query params (errors come here; code flow fallback)
+    const queryParams = new URLSearchParams(window.location.search);
+    const code = queryParams.get('code');
+    const queryState = queryParams.get('state');
+    const error = queryParams.get('error');
+
+    const statusEl = document.getElementById('status');
+    const errorEl = document.getElementById('error');
+
+    console.log('Google OAuth Callback received');
+    console.log('Fragment:', window.location.hash);
+    console.log('id_token:', idToken ? 'Present' : 'Missing');
+    console.log('Code:', code ? 'Present' : 'Missing');
+    console.log('Error:', error);
+    console.log('Window opener:', window.opener ? 'Present' : 'Not present');
+
+    if (error) {
+      // Handle OAuth errors
+      statusEl.textContent = 'Authentication failed';
+      errorEl.textContent = 'Error: ' + error;
+      errorEl.style.display = 'block';
+      setTimeout(function() { window.location.href = '/'; }, 2000);
+    } else if (idToken) {
+      // Implicit flow — decode the id_token JWT for real user data
+      const storedState = localStorage.getItem('google-oauth-state');
+      const storedNonce = localStorage.getItem('google-oauth-nonce');
+
+      if (tokenState && tokenState === storedState) {
+        const userInfo = parseJwt(idToken);
+        console.log('Google user info from id_token:', userInfo);
+
+        // Optional: verify nonce from the id_token
+        if (storedNonce && userInfo.nonce && userInfo.nonce !== storedNonce) {
+          statusEl.textContent = 'Authentication failed';
+          errorEl.textContent = 'Invalid nonce. Please try again.';
+          errorEl.style.display = 'block';
+          setTimeout(function() { window.location.href = '/'; }, 2000);
+        } else {
+          // Build real user profile from Google data
+          const realUser = {
+            id: userInfo.sub || 'google_' + Math.random().toString(36).substring(2, 15),
+            name: userInfo.name || 'Google User',
+            email: userInfo.email || '',
+            avatar: userInfo.picture || '👤',
+            picture: userInfo.picture || '',
+            sub: userInfo.sub || '',
+            provider: 'google'
+          };
+
+          localStorage.setItem('pomo-user', JSON.stringify(realUser));
+          localStorage.setItem('google-oauth-success', JSON.stringify(realUser));
+          localStorage.removeItem('google-oauth-state');
+          localStorage.removeItem('google-oauth-nonce');
+
+          if (window.opener) {
+            // Popup mode — notify opener and close
+            console.log('Sending postMessage to opener with real user data');
+            window.opener.postMessage({ type: 'google-oauth-success', user: realUser }, window.location.origin);
+            statusEl.textContent = 'Success! You can close this window.';
+            setTimeout(function() { window.close(); }, 300);
+          } else {
+            // Same-window fallback — redirect to main app
+            statusEl.textContent = 'Success! Redirecting...';
+            console.log('Redirecting to main app (same window)');
+            setTimeout(function() { window.location.href = '/'; }, 500);
+          }
+        }
+      } else {
+        statusEl.textContent = 'Authentication failed';
+        errorEl.textContent = 'Invalid state parameter. Please try again.';
+        errorEl.style.display = 'block';
+        setTimeout(function() { window.location.href = '/'; }, 2000);
+      }
+    } else if (code) {
+      // Fallback: Authorization Code flow (backward compatibility)
+      const storedState = localStorage.getItem('google-oauth-state');
+
+      if (queryState && queryState === storedState) {
+        const demoUser = {
+          id: 'google_' + Math.random().toString(36).substring(2, 15),
+          name: 'Google User',
+          email: 'user@gmail.com',
+          avatar: '👤',
+          provider: 'google',
+          authCode: code
+        };
+
+        localStorage.setItem('pomo-user', JSON.stringify(demoUser));
+        localStorage.setItem('google-oauth-success', JSON.stringify(demoUser));
+        localStorage.removeItem('google-oauth-state');
+
+        if (window.opener) {
+          window.opener.postMessage({ type: 'google-oauth-success', user: demoUser }, window.location.origin);
+          statusEl.textContent = 'Success! You can close this window.';
+          setTimeout(function() { window.close(); }, 300);
+        } else {
+          statusEl.textContent = 'Success! Redirecting...';
+          setTimeout(function() { window.location.href = '/'; }, 500);
+        }
+      } else {
+        statusEl.textContent = 'Authentication failed';
+        errorEl.textContent = 'Invalid state parameter. Please try again.';
+        errorEl.style.display = 'block';
+        setTimeout(function() { window.location.href = '/'; }, 2000);
+      }
+    } else {
+      // No token, code, or error
+      statusEl.textContent = 'Authentication incomplete';
+      errorEl.textContent = 'No authorization response received.';
+      errorEl.style.display = 'block';
+      setTimeout(function() { window.location.href = '/'; }, 2000);
+    }
+  </script>
+</body>
+</html>
