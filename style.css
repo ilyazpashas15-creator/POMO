@@ -7832,11 +7832,6 @@ input:checked+.toggle-track:before {
     line-height: 1.2;
   }
 
-  .pomo-features-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
   .pomo-feature-card {
     padding: 16px 12px;
   }
@@ -7965,6 +7960,13 @@ input:checked+.toggle-track:before {
 
   .pomo-features-title {
     font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .pomo-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
 
