@@ -7832,22 +7832,35 @@ input:checked+.toggle-track:before {
     line-height: 1.2;
   }
 
+  .pomo-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
   .pomo-feature-card {
-    padding: 24px 16px;
+    padding: 16px 12px;
   }
 
   .pomo-feature-icon {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .pomo-feature-icon svg {
+    width: 18px;
+    height: 18px;
   }
 
   .pomo-feature-card h4 {
-    font-size: 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
   }
 
   .pomo-feature-card p {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    line-height: 1.3;
   }
 }
 
