@@ -1,8 +1,8 @@
 // ===== Pomo — Advanced Cognitive Flow Partner =====
 
 // --- Vercel Speed Insights ---
-import { injectSpeedInsights } from '@vercel/speed-insights';
-injectSpeedInsights();
+import { inject } from '@vercel/speed-insights';
+inject();
 
 // --- Default Config ---
 const DEFAULTS = {
