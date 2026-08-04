@@ -4627,18 +4627,179 @@ function bindEvents() {
 
   if (fSubmit) {
     fSubmit.addEventListener('click', () => {
+      // Get feedback data
+      const rating = $$('#feedback-stars .star-icon.active').length;
+      const categories = Array.from($$('.category-pill.active')).map(c => c.textContent);
+      const comment = $('.feedback-modal-content textarea').value;
+      
+      if (rating === 0) {
+        showToast('Please select a rating', 'error');
+        return;
+      }
+      
+      if (!comment.trim()) {
+        showToast('Please write your feedback', 'error');
+        return;
+      }
+      
+      // Get user info
+      const userData = localStorage.getItem('pomo-user');
+      let username = 'Anonymous User';
+      let avatar = '👤';
+      
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          username = user.name || user.username || 'Anonymous User';
+          avatar = user.avatar || user.picture || '👤';
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+      
+      // Save feedback
+      const feedback = {
+        id: Date.now(),
+        username: username,
+        avatar: avatar,
+        rating: rating,
+        categories: categories,
+        comment: comment.trim(),
+        timestamp: new Date().toISOString()
+      };
+      
+      // Load existing feedbacks
+      let feedbacks = [];
+      try {
+        const stored = localStorage.getItem('pomo-feedbacks');
+        if (stored) feedbacks = JSON.parse(stored);
+      } catch (e) {
+        feedbacks = [];
+      }
+      
+      // Add new feedback
+      feedbacks.unshift(feedback); // Add to beginning
+      localStorage.setItem('pomo-feedbacks', JSON.stringify(feedbacks));
+      
       fSubmit.innerHTML = '<span>Uploading Data...</span>';
       setTimeout(() => {
         $('#feedback-overlay').classList.add('hidden');
         fSubmit.innerHTML = '<span>Submit Intelligence Report</span>';
+        showToast('Feedback submitted successfully! 🎉');
         addChatMessage("<strong>System Feedback Received.</strong> Pomo optimization paths updated based on your input.", 'bot');
+        
         // Reset
         fStars.forEach(s => s.classList.remove('active'));
         fCategories.forEach(c => c.classList.remove('active'));
         $('.feedback-modal-content textarea').value = '';
+        
+        // Refresh reviews if modal is open
+        if ($('#testimonials-overlay') && !$('#testimonials-overlay').classList.contains('hidden')) {
+          loadUserReviews();
+        }
       }, 1500);
     });
   }
+
+// Function to load and display user reviews
+function loadUserReviews() {
+  const reviewsGrid = $('.reviews-grid');
+  if (!reviewsGrid) return;
+  
+  // Load user feedbacks
+  let feedbacks = [];
+  try {
+    const stored = localStorage.getItem('pomo-feedbacks');
+    if (stored) feedbacks = JSON.parse(stored);
+  } catch (e) {
+    feedbacks = [];
+  }
+  
+  // Clear existing content
+  reviewsGrid.innerHTML = '';
+  
+  // Add user submitted feedbacks
+  feedbacks.forEach(feedback => {
+    const card = document.createElement('div');
+    card.className = 'review-card-v2';
+    
+    // Create avatar element
+    let avatarHtml = '';
+    if (feedback.avatar.startsWith('http')) {
+      avatarHtml = `<img src="${feedback.avatar}" alt="${feedback.username}">`;
+    } else {
+      avatarHtml = `<span style="font-size: 2rem;">${feedback.avatar}</span>`;
+    }
+    
+    // Generate star rating display
+    const stars = '⭐'.repeat(feedback.rating);
+    
+    card.innerHTML = `
+      <div class="review-user-row">
+        <div class="review-avatar">${avatarHtml}</div>
+        <div class="review-username">${feedback.username}</div>
+      </div>
+      <div style="margin-bottom: 8px; color: #fbbf24;">${stars}</div>
+      <p class="review-text">${feedback.comment}</p>
+      ${feedback.categories.length > 0 ? `<div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+        ${feedback.categories.map(cat => `<span style="padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 12px; font-size: 0.75rem; color: var(--accent-teal);">${cat}</span>`).join('')}
+      </div>` : ''}
+    `;
+    reviewsGrid.appendChild(card);
+  });
+  
+  // Add default reviews at the end
+  const defaultReviews = [
+    {
+      name: 'Ananya Paul',
+      avatar: 'https://i.pravatar.cc/150?u=ananya',
+      text: 'Pomo has been a great listener to me. I have been able to have more clarity after chatting with the Chatbot. I really liked how it gave a logical solution to all my problems while sounding empathetic and lending a friendly ear everytime.'
+    },
+    {
+      name: 'Saheb Singh Hora',
+      avatar: 'https://i.pravatar.cc/150?u=saheb',
+      text: 'I was highly impressed how the website manages to integrate various features like Focus tracking, AI bot, meditative features, and productivity help. It is a one-stop solution for all the concerns related to mental productivity.'
+    },
+    {
+      name: 'Mahi Priya S',
+      avatar: 'https://i.pravatar.cc/150?u=mahi',
+      text: 'Great experience with the Pomo AI productivity assistant! It provided personalized support, focus strategies, and mindfulness techniques with empathy and understanding. The anonymous and accessible platform helped me open up.'
+    },
+    {
+      name: 'Ayush Jaju',
+      avatar: 'https://i.pravatar.cc/150?u=ayush',
+      text: "Pomo's intuitive interface and compassionate responses offer groundbreaking, personalized advice. It provides empathetic guidance, supporting those in focus-distress with tailored comfort and practical solutions."
+    }
+  ];
+  
+  defaultReviews.forEach(review => {
+    const card = document.createElement('div');
+    card.className = 'review-card-v2';
+    card.innerHTML = `
+      <div class="review-user-row">
+        <div class="review-avatar"><img src="${review.avatar}" alt="${review.name}"></div>
+        <div class="review-username">${review.name}</div>
+      </div>
+      <p class="review-text">${review.text}</p>
+    `;
+    reviewsGrid.appendChild(card);
+  });
+}
+
+// Load reviews when testimonials modal is opened
+const testimonialsOverlay = $('#testimonials-overlay');
+if (testimonialsOverlay) {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        if (!testimonialsOverlay.classList.contains('hidden')) {
+          loadUserReviews();
+        }
+      }
+    });
+  });
+  observer.observe(testimonialsOverlay, { attributes: true });
+}
 
   // Close handlers for sub-modals
   ['music', 'feedback', 'about', 'themes', 'rewards', 'testimonials', 'faqs', 'terms', 'privacy', 'premium', 'sos', 'mobile'].forEach(id => {
